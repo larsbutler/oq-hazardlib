@@ -131,6 +131,17 @@ class Polygon(object):
         new_2d_polygon = self._polygon2d.buffer(dilation)
         return type(self)._from_2d(new_2d_polygon, self._projection)
 
+    def _predicate(self, mesh, fn):
+        plons, plats = self._projection(mesh.lons, mesh.lats)
+
+        result = numpy.empty(mesh.lons.shape, dtype=bool)
+
+        for i in xrange(mesh.lons.size):
+            contains = fn(shapely.geometry.Point(plons.item(i), plats.item(i)))
+            result.itemset(i, contains)
+
+        return result
+
     def contains(self, mesh):
         """
         Check for containment of a :class:`~nhlib.geo.mesh.Mesh` of points.
@@ -144,17 +155,11 @@ class Polygon(object):
             coordinate arrays.
         """
         self._init_polygon2d()
-        plons, plats = self._projection(mesh.lons, mesh.lats)
+        return self._predicate(mesh, self._polygon2d.contains)
 
-        result = numpy.empty(mesh.lons.shape, dtype=bool)
-
-        for i in xrange(mesh.lons.size):
-            contains = self._polygon2d.contains(
-                shapely.geometry.Point(plons.item(i), plats.item(i))
-            )
-            result.itemset(i, contains)
-
-        return result
+    def intersects(self, mesh):
+        self._init_polygon2d()
+        return self._predicate(mesh, self._polygon2d.intersects)
 
     def discretize(self, mesh_spacing):
         """
