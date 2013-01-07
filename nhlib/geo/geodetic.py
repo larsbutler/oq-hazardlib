@@ -207,6 +207,58 @@ def min_distance(mlons, mlats, mdepths, slons, slats, sdepths, indices=False):
         return result.reshape(orig_shape)
 
 
+def min_distance_plus_indices(mlons, mlats, mdepths, slons, slats, sdepths):
+    assert mlons.ndim > 0
+    mlons, mlats, slons, slats = _prepare_coords(mlons, mlats, slons, slats)
+    mdepths = numpy.array(mdepths, float)
+    sdepths = numpy.array(sdepths, float)
+    assert mlons.shape == mdepths.shape
+    assert slons.shape == sdepths.shape
+
+    orig_shape = slons.shape
+
+    mlons = mlons.reshape(-1)
+    mlats = mlats.reshape(-1)
+    mdepths = mdepths.reshape(-1)
+    slons = slons.reshape(-1)
+    slats = slats.reshape(-1)
+    sdepths = sdepths.reshape(-1)
+
+    cos_mlats = numpy.cos(mlats)
+    cos_slats = numpy.cos(slats)
+
+    dist_squares = (
+        # next five lines are the same as in geodetic_distance()
+        (numpy.arcsin(numpy.sqrt(
+            numpy.sin((mlats - slats[i]) / 2.0) ** 2.0
+            + cos_mlats * cos_slats[i]
+              * numpy.sin((mlons - slons[i]) / 2.0) ** 2.0
+        ).clip(-1., 1.)) * (2 * EARTH_RADIUS)) ** 2
+        + (mdepths - sdepths[i]) ** 2
+        for i in xrange(len(slats))
+    )
+
+    result_shape = slons.flatten().shape
+    result_dist = numpy.empty(result_shape)
+    result_indices = numpy.empty(result_shape)
+
+    for i, dist_sq in enumerate(dist_squares):
+        # TODO: Need to cast to float here (instead of float64)?
+        result_dist[i] = numpy.sqrt(numpy.min(dist_sq))
+        result_indices[i] = numpy.argmin(dist_sq, axid=-1)
+
+
+    ######
+    if not orig_shape:
+        # original target point was a scalar, so return scalar as well
+        [result] = result
+        return result
+    else:
+        return result.reshape(orig_shape)
+    ######
+
+
+
 def intervals_between(lon1, lat1, depth1, lon2, lat2, depth2, length):
     """
     Find a list of points between two given ones that lie on the same
