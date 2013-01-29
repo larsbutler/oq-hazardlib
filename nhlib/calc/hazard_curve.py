@@ -89,9 +89,16 @@ def hazard_curves_poissonian(
             for imt in imts:
                 poes = gsim.get_poes(sctx, rctx, dctx, imt, imts[imt],
                                      truncation_level)
-                curves[imt] *= r_sites.expand(
-                    (1 - prob) ** poes, total_sites, placeholder=1
-                )
+
+                probs = (1 - prob) ** poes
+                if r_sites.indices is None:
+                    # The input site collection was not filtered.
+                    curves[imt] *= probs
+                else:
+                    # The input site collection was filtered by source/rupture.
+                    # Aggregate the results at the correct indices:
+                    for i, idx in enumerate(r_sites.indices):
+                        curves[imt][i] *= probs[i]
 
     for imt in imts:
         curves[imt] = 1 - curves[imt]
