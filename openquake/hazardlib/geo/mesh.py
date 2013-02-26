@@ -459,7 +459,7 @@ class RectangularMesh(Mesh):
             # specific platforms) so the work around here is to remove the
             # duplicate polygons. In fact, we only observed this error on our
             # CI/build machine. None of our dev environments or production
-            # machines has encountered this error, at least consistently.
+            # machines has encountered this error, at least consistently. >:(
             polygons = [shapely.wkt.loads(x) for x in
                         list(set(p.wkt for p in polygons))]
             polygon = shapely.ops.cascaded_union(polygons) \
