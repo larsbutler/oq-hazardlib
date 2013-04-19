@@ -19,8 +19,15 @@
 """
 import numpy
 
-from openquake.hazardlib.tom import PoissonTOM
+from itertools import izip
+
 from openquake.hazardlib.calc import filters
+from openquake.hazardlib.geo import Point
+from openquake.hazardlib.mfd import EvenlyDiscretizedMFD
+from openquake.hazardlib.mfd import TruncatedGRMFD
+from openquake.hazardlib.source import AreaSource
+from openquake.hazardlib.source import PointSource
+from openquake.hazardlib.tom import PoissonTOM
 
 
 def hazard_curves_poissonian(
@@ -82,7 +89,10 @@ def hazard_curves_poissonian(
     tom = PoissonTOM(time_span)
 
     total_sites = len(sites)
+
+    sources = prepare_sources(sources)
     sources_sites = ((source, sites) for source in sources)
+
     for source, s_sites in source_site_filter(sources_sites):
         ruptures_sites = ((rupture, s_sites)
                           for rupture in source.iter_ruptures(tom))
@@ -100,3 +110,46 @@ def hazard_curves_poissonian(
     for imt in imts:
         curves[imt] = 1 - curves[imt]
     return curves
+
+
+def prepare_sources(sources):
+    for source in sources:
+        if isinstance(source, AreaSource):
+            for pt_src in area_source_to_point_sources(source):
+                yield pt_src
+        else:
+            yield source
+
+def area_source_to_point_sources(area_source):
+    mesh = area_source.polygon.discretize(area_source.area_discretization)
+    num_points = len(mesh)
+
+    mfd = area_source.mfd
+    if isinstance(mfd, TruncatedGRMFD):
+        new_a_val = numpy.log10(10 ** area_source.mfd.a_val / num_points)
+        new_mfd = TruncatedGRMFD(min_mag=mfd.min_mag, max_mag=mfd.max_mag,
+                                 bin_width=mfd.bin_width, a_val=new_a_val,
+                                 b_val=mfd.b_val)
+    elif isinstance(mfd, EvenlyDiscretizedMFD):
+        new_occur_rates = [float(x) / num_points for x in mfd.occurrence_rates]
+        new_mfd = EvenlyDiscretizedMFD(min_mag=mfd.min_mag,
+                                       bin_width=mfd.bin_width,
+                                       occurrence_rates=new_occur_rates)
+
+    for lon, lat in izip(mesh.lons, mesh.lats):
+        pt = PointSource(
+            source_id='fake',
+            name='fake',
+            tectonic_region_type=area_source.tectonic_region_type,
+            mfd=new_mfd,
+            rupture_mesh_spacing=area_source.rupture_mesh_spacing,
+            magnitude_scaling_relationship=area_source\
+                .magnitude_scaling_relationship,
+            rupture_aspect_ratio=area_source.rupture_aspect_ratio,
+            upper_seismogenic_depth=area_source.upper_seismogenic_depth,
+            lower_seismogenic_depth=area_source.lower_seismogenic_depth,
+            location=Point(lon, lat),
+            nodal_plane_distribution=area_source.nodal_plane_distribution,
+            hypocenter_distribution=area_source.hypocenter_distribution
+        )
+        yield pt
