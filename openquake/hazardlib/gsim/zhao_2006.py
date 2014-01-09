@@ -453,3 +453,154 @@ class ZhaoEtAl2006SInterNSHMP2008(ZhaoEtAl2006SInter):
         4.00  -0.390 -0.1486  0.1038  0.3821
         5.00  -0.498 -0.1578  0.1090  0.3766
         """)
+class ZhaoEtAl2006AscSWISS01(ZhaoEtAl2006Asc):
+       """
+       K-adjustments corresponding to model 01 - as prepared by Ben Edwards
+       K-value for PGA were not provided but infered from SA[]0.01s]
+       Adjust accordingly!!!
+       """
+       def get_mean_and_stddevs(self, sites, rup, dists, imt, stddev_types):
+           C_ADJ = self.COEFFS_FS_ROCK[imt]
+           mean, stddevs = super(ZhaoEtAl2006AscSWISS01,self).\
+           get_mean_and_stddevs(sites,rup,dists,imt,stddev_types)
+
+           #: apply k-correction corresponding to the lower model [01]
+           mean_corr =  np.exp(mean) * C_ADJ['k_adj'] * self._compute_small_mag_correction_term(C_ADJ, rup.mag, dists.rrup)
+           mean = np.log(mean_corr)
+
+           stddevs = np.array(stddevs)
+           return mean, stddevs
+
+       def _compute_small_mag_correction_term(self,C,mag,rrup):
+           if mag >= 3.00 and mag < 5.5:
+            return 1 / np.exp(((5.50-mag)/C['a1'])**C['a2']*(C['b1'] + C['b2'] * np.log(np.maximum(np.minimum(rrup, C['Rm']), 10)/20)))
+            print mag
+           elif mag >= 5.50:
+           	return 1
+           else:
+           	return 1
+
+       COEFFS_FS_ROCK = CoeffsTable(sa_damping=5, table="""\
+    IMT    k_adj           a1              a2              b1              b2              Rm
+    pga    0.893272000     1.642085E+00    1.833001E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    0.05   0.960326204     1.590620E+00    1.617332E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    0.10   0.883646750     1.478437E+00    1.608714E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    0.15   0.848710124     1.488927E+00    1.732820E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    0.20   0.829169096     1.496370E+00    1.826639E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    0.25   0.819497568     1.473785E+00    1.854356E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    0.30   0.814346585     1.455332E+00    1.877313E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    0.40   0.814243546     1.428722E+00    1.886767E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    0.50   0.812705538     1.405794E+00    1.841480E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    0.60   0.815801037     1.387061E+00    1.805286E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    0.70   0.820928683     1.371222E+00    1.775240E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    0.80   0.827376206     1.357502E+00    1.749618E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    0.90   0.831408127     1.345400E+00    1.727324E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    1.00   0.840799961     1.334574E+00    1.707623E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    1.25   0.855226821     1.168218E+00    1.437403E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    1.50   0.871104233     1.032296E+00    1.248681E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    2.00   0.891458727     8.178257E-01    1.000000E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    2.50   0.903858490     8.178257E-01    1.000000E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    3.00   0.913991280     8.178257E-01    1.000000E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    4.00   0.913352473     8.178257E-01    1.000000E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    5.00   0.912857283     8.178257E-01    1.000000E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    """)
+class ZhaoEtAl2006AscSWISS04(ZhaoEtAl2006Asc):
+    """
+    K-adjustments corresponding to model 01 - as prepared by Ben Edwards
+    K-value for PGA were not provided but infered from SA[]0.01s]
+    Adjust accordingly!!!
+    """
+    def get_mean_and_stddevs(self, sites, rup, dists, imt, stddev_types):
+        C_ADJ = self.COEFFS_FS_ROCK[imt]
+        mean, stddevs = super(ZhaoEtAl2006AscSWISS04,self).\
+        get_mean_and_stddevs(sites,rup,dists,imt,stddev_types)
+
+        #: apply k-correction corresponding to the lower model [01]
+        mean_corr =  np.exp(mean) * C_ADJ['k_adj'] * self._compute_small_mag_correction_term(C_ADJ, rup.mag, dists.rrup)
+        mean = np.log(mean_corr)
+
+        stddevs = np.array(stddevs)
+        return mean, stddevs
+
+    def _compute_small_mag_correction_term(self,C,mag,rrup):
+        if mag >= 3.00 and mag < 5.5:
+          return 1 / np.exp(((5.50-mag)/C['a1'])**C['a2']*C['b1'] + C['b2'] * np.log(np.maximum(np.minimum(rrup, C['Rm']), 10)/20))
+        elif mag >= 5.50:
+          return 1
+        else:
+          return 1
+
+    COEFFS_FS_ROCK = CoeffsTable(sa_damping=5, table="""\
+    IMT    k_adj           a1              a2              b1              b2              Rm
+    pga    1.037040000     1.642085E+00    1.833001E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    0.05   1.152476093     1.590620E+00    1.617332E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    0.10   0.995583662     1.478437E+00    1.608714E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    0.15   0.948713303     1.488927E+00    1.732820E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    0.20   0.936827687     1.496370E+00    1.826639E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    0.25   0.941001497     1.473785E+00    1.854356E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    0.30   0.951517574     1.455332E+00    1.877313E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    0.40   0.980951997     1.428722E+00    1.886767E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    0.50   0.999448607     1.405794E+00    1.841480E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    0.60   1.013777169     1.387061E+00    1.805286E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    0.70   1.022460327     1.371222E+00    1.775240E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    0.80   1.026784122     1.357502E+00    1.749618E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    0.90   1.024261640     1.345400E+00    1.727324E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    1.00   1.025806874     1.334574E+00    1.707623E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    1.25   1.014356561     1.168218E+00    1.437403E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    1.50   1.006424520     1.032296E+00    1.248681E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    2.00   0.990611915     8.178257E-01    1.000000E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    2.50   0.981034792     8.178257E-01    1.000000E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    3.00   0.978562884     8.178257E-01    1.000000E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    4.00   0.958470267     8.178257E-01    1.000000E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    5.00   0.943169770     8.178257E-01    1.000000E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    """)
+class ZhaoEtAl2006AscSWISS08(ZhaoEtAl2006Asc):
+    """
+    K-adjustments corresponding to model 01 - as prepared by Ben Edwards
+    K-value for PGA were not provided but infered from SA[]0.01s]
+    Adjust accordingly!!!
+    """
+    def get_mean_and_stddevs(self, sites, rup, dists, imt, stddev_types):
+        C_ADJ = self.COEFFS_FS_ROCK[imt]
+        mean, stddevs = super(ZhaoEtAl2006AscSWISS08,self).\
+        get_mean_and_stddevs(sites,rup,dists,imt,stddev_types)
+
+        #: apply k-correction corresponding to the lower model [01]
+        mean_corr =  np.exp(mean) * C_ADJ['k_adj'] * self._compute_small_mag_correction_term(C_ADJ, rup.mag, dists.rrup)
+        mean = np.log(mean_corr)
+
+        stddevs = np.array(stddevs)
+        return mean, stddevs
+
+    def _compute_small_mag_correction_term(self,C,mag,rrup):
+        if mag >= 3.00 and mag < 5.5:
+          return 1 / np.exp(((5.50-mag)/C['a1'])**C['a2']*C['b1'] + C['b2'] * np.log(np.maximum(np.minimum(rrup, C['Rm']), 10)/20))
+        elif mag >= 5.50:
+          return 1
+        else:
+          return 1
+
+    COEFFS_FS_ROCK = CoeffsTable(sa_damping=5, table="""\
+    IMT    k_adj           a1              a2              b1              b2              Rm
+    pga    1.414560000     1.642085E+00    1.833001E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    0.05   2.012007281     1.590620E+00    1.617332E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    0.10   1.363140802     1.478437E+00    1.608714E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    0.15   1.143182969     1.488927E+00    1.732820E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    0.20   1.039739290     1.496370E+00    1.826639E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    0.25   0.983550465     1.473785E+00    1.854356E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    0.30   0.948764154     1.455332E+00    1.877313E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    0.40   0.913557081     1.428722E+00    1.886767E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    0.50   0.891456331     1.405794E+00    1.841480E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    0.60   0.881236402     1.387061E+00    1.805286E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    0.70   0.877081048     1.371222E+00    1.775240E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    0.80   0.876720492     1.357502E+00    1.749618E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    0.90   0.875316976     1.345400E+00    1.727324E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    1.00   0.880663480     1.334574E+00    1.707623E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    1.25   0.887163571     1.168218E+00    1.437403E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    1.50   0.897498847     1.032296E+00    1.248681E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    2.00   0.910434478     8.178257E-01    1.000000E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    2.50   0.918285853     8.178257E-01    1.000000E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    3.00   0.926223751     8.178257E-01    1.000000E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    4.00   0.922398917     8.178257E-01    1.000000E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    5.00   0.919443026     8.178257E-01    1.000000E+00    1.000000E+00    0.000000E+00    1.000000E+09
+    """)
