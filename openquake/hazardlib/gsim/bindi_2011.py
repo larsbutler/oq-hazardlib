@@ -55,10 +55,10 @@ for a fixed depth of 15 km and epicentral distance (equation 5 in the paper)
     ])
 
     #: Required rupture parameters are magnitude 
-    REQUIRES_RUPTURE_PARAMETERS = set(('mag'))
+    REQUIRES_RUPTURE_PARAMETERS = set(('mag', 'hypo_depth'))
 
     #: Required distance measure is joyner-boore, 
-    REQUIRES_DISTANCES = set(('rjb', ))
+    REQUIRES_DISTANCES = set(('rrup', ))
 
     def get_mean_and_stddevs(self, rup, dists, imt, stddev_types):
         """
@@ -70,18 +70,17 @@ for a fixed depth of 15 km and epicentral distance (equation 5 in the paper)
         # intensity measure type
         C = self.COEFFS[imt]
 
-        mean = self._compute_mean(C, rup.mag, dists.rjb, imt)
+        mean = self._compute_mean(C, rup.mag, dists.rrup, imt)
 
         stddevs = self._get_stddevs(C, stddev_types)
 
         return mean, stddevs  
 
-    def _compute_mean(self, C, mag, rjb):
+    def _compute_mean(self, C, mag, rrup, hypo_depth):
         """
         Compute mean value for MSK-64.
         """
-    mean = C['a1']*mag +C['a2']-C['a3'] * np.log10 (np.sqrt((rjb**2 + 15**2) / 15**2))-C['a4'] * np.sqrt(rjb**2 + 15**2)-15)
-
+    mean = C['a1']*mag +C['a2']-C['a3'] * np.log10 (np.sqrt((rrup**2 + hypo_depth**2) / hypo_depth**2))-C['a4'] * np.sqrt(rrup**2 + hypo_depth**2)-hypo_depth)
 
         return mean
 
@@ -101,4 +100,4 @@ for a fixed depth of 15 km and epicentral distance (equation 5 in the paper)
     COEFFS = CoeffsTable(table="""\
     IMT       a1     a2      a3      a4      sigma
     MMI      1.049  0.686  2.706   0.0001811   0.689
-        """)
+    """)
