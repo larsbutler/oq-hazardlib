@@ -672,13 +672,14 @@ class CauzziFaccioli2008SWISS01(CauzziFaccioli2008):
         """
         C1_rrup =0.0
 
-        if dists.rhypo < C['Rc11']:
+        if (dists.rhypo < C['Rc11']).any():
             C1_rrup = C['phi_11']
             #~ print 'case01 rhypo< ', C1_rrup
-        elif dists.rhypo >= C['Rc11'] and dists.rhypo <= C['Rc21']:
+        elif ((dists.rhypo >= C['Rc11']).any()
+                and (dists.rhypo <= C['Rc21']).any()):
             C1_rrup = C['phi_11'] + (C['phi_21'] - C['phi_11']) * ((dists.rhypo - C['Rc11']) / (C['Rc21'] - C['Rc11']))
             #~ print 'case02 rhypo> < ', C1_rrup
-        elif dists.rhypo > C['Rc21']:
+        elif (dists.rhypo > C['Rc21']).any():
             C1_rrup = C['phi_21']
             print 'case03 rhypo> ', C1_rrup
         return C1_rrup
@@ -987,13 +988,14 @@ class CauzziFaccioli2008SWISS04(CauzziFaccioli2008):
         """
         C1_rrup =0.0
 
-        if dists.rhypo < C['Rc11']:
+        if (dists.rhypo < C['Rc11']).any():
             C1_rrup = C['phi_11']
             #~ print 'case01 rhypo< ', C1_rrup
-        elif dists.rhypo >= C['Rc11'] and dists.rhypo <= C['Rc21']:
+        elif ((dists.rhypo >= C['Rc11']).any()
+                and (dists.rhypo <= C['Rc21']).any()):
             C1_rrup = C['phi_11'] + (C['phi_21'] - C['phi_11']) * ((dists.rhypo - C['Rc11']) / (C['Rc21'] - C['Rc11']))
             #~ print 'case02 rhypo> < ', C1_rrup
-        elif dists.rhypo > C['Rc21']:
+        elif (dists.rhypo > C['Rc21']).any():
             C1_rrup = C['phi_21']
             print 'case03 rhypo> ', C1_rrup
         return C1_rrup
@@ -1302,13 +1304,14 @@ class CauzziFaccioli2008SWISS08(CauzziFaccioli2008):
         """
         C1_rrup =0.0
 
-        if dists.rhypo < C['Rc11']:
+        if (dists.rhypo < C['Rc11']).any():
             C1_rrup = C['phi_11']
             #~ print 'case01 rhypo< ', C1_rrup
-        elif dists.rhypo >= C['Rc11'] and dists.rhypo <= C['Rc21']:
+        elif ((dists.rhypo >= C['Rc11']).any()
+                and (dists.rhypo <= C['Rc21']).any()):
             C1_rrup = C['phi_11'] + (C['phi_21'] - C['phi_11']) * ((dists.rhypo - C['Rc11']) / (C['Rc21'] - C['Rc11']))
             #~ print 'case02 rhypo> < ', C1_rrup
-        elif dists.rhypo > C['Rc21']:
+        elif (dists.rhypo > C['Rc21']).any():
             C1_rrup = C['phi_21']
             print 'case03 rhypo> ', C1_rrup
         return C1_rrup
@@ -1860,7 +1863,6 @@ class CauzziFaccioli2008SWISS04T(CauzziFaccioli2008SWISS04):
                 stddevs.append(np.log(C['s_between_ev']) + np.zeros(num_sites))
         return stddevs
 
-        return mean, stddevs
     COEFFS_PHI_SS =      CoeffsTable( sa_damping = 5, table = """\
     IMT              phi_ss
     pga              0.460
@@ -2117,7 +2119,6 @@ class CauzziFaccioli2008SWISS08T(CauzziFaccioli2008SWISS08):
                 stddevs.append(np.log(C['s_between_ev']) + np.zeros(num_sites))
         return stddevs
 
-        return mean, stddevs
     COEFFS_PHI_SS =      CoeffsTable( sa_damping = 5, table = """\
     IMT              phi_ss
     pga              0.460
