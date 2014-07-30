@@ -339,11 +339,12 @@ class ChiouYoungs2008SWISS01(ChiouYoungs2008):
         The C1 coeff are used to compute the single station sigma
         """
         C1_rrup =0.0
-        if dists.rrup < C['Rc11']:
+        if (dists.rrup < C['Rc11']).any():
             C1_rrup = C['phi_11']
-        elif dists.rrup >= C['Rc11'] and dists.rrup <= C['Rc21']:
+        elif ((dists.rrup >= C['Rc11']).any()
+                and (dists.rrup <= C['Rc21']).any()):
             C1_rrup = C['phi_11'] + (C['phi_21'] - C['phi_11']) * ((dists.rrup - C['Rc11']) / (C['Rc21'] - C['Rc11']))
-        elif dists.rrup > C['Rc21']:
+        elif (dists.rrup > C['Rc21']).any():
             C1_rrup = C['phi_21']
         return C1_rrup
 
@@ -482,11 +483,12 @@ class ChiouYoungs2008SWISS06(ChiouYoungs2008):
         The C1 coeff are used to compute the single station sigma
         """
         C1_rrup =0.0
-        if dists.rrup < C['Rc11']:
+        if (dists.rrup < C['Rc11']).any():
             C1_rrup = C['phi_11']
-        elif dists.rrup >= C['Rc11'] and dists.rrup <= C['Rc21']:
+        elif ((dists.rrup >= C['Rc11']).any()
+                and (dists.rrup <= C['Rc21']).any()):
             C1_rrup = C['phi_11'] + (C['phi_21'] - C['phi_11']) * ((dists.rrup - C['Rc11']) / (C['Rc21'] - C['Rc11']))
-        elif dists.rrup > C['Rc21']:
+        elif (dists.rrup > C['Rc21']).any():
             C1_rrup = C['phi_21']
         return C1_rrup
 
@@ -625,11 +627,12 @@ class ChiouYoungs2008SWISS04(ChiouYoungs2008):
         The C1 coeff are used to compute the single station sigma
         """
         C1_rrup =0.0
-        if dists.rrup < C['Rc11']:
+        if (dists.rrup < C['Rc11']).any():
             C1_rrup = C['phi_11']
-        elif dists.rrup >= C['Rc11'] and dists.rrup <= C['Rc21']:
+        elif ((dists.rrup >= C['Rc11']).any()
+                and (dists.rrup <= C['Rc21']).any()):
             C1_rrup = C['phi_11'] + (C['phi_21'] - C['phi_11']) * ((dists.rrup - C['Rc11']) / (C['Rc21'] - C['Rc11']))
-        elif dists.rrup > C['Rc21']:
+        elif (dists.rrup > C['Rc21']).any():
             C1_rrup = C['phi_21']
         return C1_rrup
 
