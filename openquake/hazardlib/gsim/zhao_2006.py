@@ -520,11 +520,12 @@ class ZhaoEtAl2006AscSWISS05(ZhaoEtAl2006Asc):
            The C1 coeff are used to compute the single station sigma
            """
            C1_rrup =0.0
-           if dists.rrup < C['Rc11']:
+           if (dists.rrup < C['Rc11']).any():
             C1_rrup = C['phi_11']
-           elif dists.rrup >= C['Rc11'] and dists.rrup <= C['Rc21']:
+           elif ((dists.rrup >= C['Rc11']).any()
+                    and (dists.rrup <= C['Rc21']).any()):
             C1_rrup = C['phi_11'] + (C['phi_21'] - C['phi_11']) * ((dists.rrup - C['Rc11']) / (C['Rc21'] - C['Rc11']))
-           elif dists.rrup > C['Rc21']:
+           elif (dists.rrup > C['Rc21']).any():
             C1_rrup = C['phi_21']
            return C1_rrup
 
@@ -631,18 +632,19 @@ class ZhaoEtAl2006AscSWISS03(ZhaoEtAl2006Asc):
             return 1
 
     def _compute_C1_term( self, C, imt,dists ):
-           """
-           Return C1 coeffs as function of Rrup as proposed by Rodriguez-Marek et al (2013)
-           The C1 coeff are used to compute the single station sigma
-           """
-           C1_rrup =0.0
-           if dists.rrup < C['Rc11']:
+        """
+        Return C1 coeffs as function of Rrup as proposed by Rodriguez-Marek et al (2013)
+        The C1 coeff are used to compute the single station sigma
+        """
+        C1_rrup =0.0
+        if (dists.rrup < C['Rc11']).any():
             C1_rrup = C['phi_11']
-           elif dists.rrup >= C['Rc11'] and dists.rrup <= C['Rc21']:
+        elif ((dists.rrup >= C['Rc11']).any()
+                and (dists.rrup <= C['Rc21']).any()):
             C1_rrup = C['phi_11'] + (C['phi_21'] - C['phi_11']) * ((dists.rrup - C['Rc11']) / (C['Rc21'] - C['Rc11']))
-           elif dists.rrup > C['Rc21']:
+        elif (dists.rrup > C['Rc21']).any():
             C1_rrup = C['phi_21']
-           return C1_rrup
+        return C1_rrup
 
     def _compute_phi_ss( self, C, rup, C1_rrup ,imt):
            """
@@ -753,11 +755,12 @@ class ZhaoEtAl2006AscSWISS08(ZhaoEtAl2006Asc):
            The C1 coeff are used to compute the single station sigma
            """
            C1_rrup =0.0
-           if dists.rrup < C['Rc11']:
+           if (dists.rrup < C['Rc11']).any():
             C1_rrup = C['phi_11']
-           elif dists.rrup >= C['Rc11'] and dists.rrup <= C['Rc21']:
+           elif ((dists.rrup >= C['Rc11']).any()
+                    and (dists.rrup <= C['Rc21']).any()):
             C1_rrup = C['phi_11'] + (C['phi_21'] - C['phi_11']) * ((dists.rrup - C['Rc11']) / (C['Rc21'] - C['Rc11']))
-           elif dists.rrup > C['Rc21']:
+           elif (dists.rrup > C['Rc21']).any():
             C1_rrup = C['phi_21']
            return C1_rrup
 
