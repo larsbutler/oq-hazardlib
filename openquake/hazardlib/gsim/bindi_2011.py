@@ -29,11 +29,12 @@ from openquake.hazardlib.imt import MMI
 
 
 class BindiEtAl2011(IPE):
+
     """
     Implements IPE developed by Dino Bindi et al. 2011 and published
-    as "Intensity prediction equations for Central Asia" (Geo-physical journal international, 2011, 187,327-337).
-for a fixed depth of 15 km and epicentral distance (equation 5 in the paper) 
-
+    as "Intensity prediction equations for Central Asia" (Geo-physical journal
+    international, 2011, 187,327-337). For a fixed depth of 15 km and
+    epicentral distance (equation 5 in the paper)
     """
 
     #: Supported tectonic region type is active shallow crust,
@@ -46,18 +47,16 @@ for a fixed depth of 15 km and epicentral distance (equation 5 in the paper)
         MMI
     ])
 
-
     DEFINED_FOR_INTENSITY_MEASURE_COMPONENT = const.IMC.HORIZONTAL
-
 
     DEFINED_FOR_STANDARD_DEVIATION_TYPES = set([
         const.StdDev.TOTAL
     ])
 
-    #: Required rupture parameters are magnitude 
+    #: Required rupture parameters are magnitude
     REQUIRES_RUPTURE_PARAMETERS = set(('mag', 'hypo_depth'))
 
-    #: Required distance measure is joyner-boore, 
+    #: Required distance measure is joyner-boore,
     REQUIRES_DISTANCES = set(('rrup', ))
 
     def get_mean_and_stddevs(self, rup, dists, imt, stddev_types):
@@ -82,8 +81,8 @@ for a fixed depth of 15 km and epicentral distance (equation 5 in the paper)
         """
         mean = (
             C['a1'] * mag + C['a2'] - C['a3'] * np.log10(
-                np.sqrt((rrup**2 + hypo_depth**2) / hypo_depth**2)
-            ) - C['a4'] * np.sqrt(rrup**2 + hypo_depth**2) -hypo_depth
+                np.sqrt((rrup ** 2 + hypo_depth ** 2) / hypo_depth ** 2)
+            ) - C['a4'] * np.sqrt(rrup ** 2 + hypo_depth ** 2) - hypo_depth
         )
 
         return mean
