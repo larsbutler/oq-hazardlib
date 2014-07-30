@@ -245,156 +245,564 @@ class ChiouYoungs2008(GMPE):
     """)
 class ChiouYoungs2008SWISS01(ChiouYoungs2008):
     """
-    K-adjustments corresponding to model 01 - as prepared by Ben Edwards
-    K-value for PGA were not provided but infered from SA[]0.01s]
-    Adjust accordingly!!!  
+    --------------------------------------------------------------------
+    This class implments an extension of the Chiou & Youngs (2008) model,
+    adjusted to be used for the new Swiss Hazard Model [2014].
+    1) kappa value
+       K-adjustments corresponding to model 01 (lower bound)- as prepared by Ben Edwards 
+       K-value for PGA were not provided but infered from SA[]0.01s]
+       the model considers a fixed value of vs30=1100m/s
+    2) small-magnitude correction
+    3) single station sigma - mean inter-event adjustment
+    4) single station sigma - inter-event magnitude/distance dependent
+    ------------------------------------------------------------------------
+    Disclaimer: these equations are modified to be used for the 
+    new Swiss Seismic Hazard Model [2014]. 
+    The use of these models is the soly responsability of the hazard modeler.
+    --------------------------------------------------------------------
+    Model implmented by laurentiu.danciu@sed.ethz.ch 
+    --------------------------------------------------------------------
     """
     def get_mean_and_stddevs(self, sites, rup, dists, imt, stddev_types):
+
         C_ADJ = self.COEFFS_FS_ROCK[imt]
+        C = self.COEFFS[imt]
+        C1_rrup =self._compute_C1_term(C_ADJ,imt, dists)
+        phi_ss = self._compute_phi_ss(C_ADJ, rup, C1_rrup, imt)
+        
+        ln_y_ref = self._get_ln_y_ref(rup, dists, self.COEFFS[imt])
+
+        exp1 = np.exp(C['phi3'] * (sites.vs30.clip(-np.inf, 1130) - 360))
+
+        exp2 = np.exp(C['phi3'] * (1130 - 360))
+        
         mean, stddevs = super(ChiouYoungs2008SWISS01,self).\
         get_mean_and_stddevs(sites,rup,dists,imt,stddev_types)
-        #: apply k-correction corresponding to the lower model [01]
+
         mean_corr =  np.exp(mean) * C_ADJ['k_adj'] * self._compute_small_mag_correction_term(C_ADJ, rup.mag, dists.rrup)
         mean = np.log(mean_corr)
- 
-        stddevs = np.array(stddevs)
+
+        std_corr = self._get_corr_stddevs(C, rup, stddev_types,ln_y_ref, exp1, exp2, phi_ss, sites)
+        stddevs = np.array(std_corr)
+
         return mean, stddevs
     
     def _compute_small_mag_correction_term(self,C,mag,rrup):
+        """
+        small magnitude correction applied to the median values
+        """        
         if mag >= 3.00 and mag < 5.5:
           return 1 / np.exp(((5.50-mag)/C['a1'])**C['a2']*(C['b1'] + C['b2'] * np.log(np.maximum(np.minimum(rrup, C['Rm']), 10)/20)))
-          print mag
         elif mag >= 5.50:
           return 1
         else:
           return 1
 
+    def _get_corr_stddevs( self, C, rup, stddev_types, ln_y_ref, exp1, exp2,phi_ss, sites):
+        """
+        Return standard deviations adjusted for single station sigma
+        as the total standard deviation - as proposed to be used in 
+        the new Swiss Hazard Model [2014].
+        """
+        # aftershock flag is zero, we consider only main shock.
+        AS = 0
+        Fmeasured = sites.vs30measured
+        Finferred = 1 - sites.vs30measured
+
+        # eq. 19 to calculate inter-event standard error
+        mag_test = min(max(rup.mag, 5.0), 7.0) - 5.0
+        tau = C['tau1'] + (C['tau2'] - C['tau1']) / 2 * mag_test
+
+        # b and c coeffs from eq. 10
+        b = C['phi2'] * (exp1 - exp2)
+        c = C['phi4']
+
+        y_ref = np.exp(ln_y_ref)
+        # eq. 20
+        NL = b * y_ref / (y_ref + c)
+        ret = []
+        for stddev_type in stddev_types:
+            assert stddev_type in self.DEFINED_FOR_STANDARD_DEVIATION_TYPES
+            if stddev_type == const.StdDev.TOTAL:
+                # eq. 21
+                ret += [np.sqrt(((1 + NL) ** 2) * (tau ** 2) + (phi_ss ** 2))]
+            elif stddev_type == const.StdDev.INTRA_EVENT:
+                ret.append(phi_ss)
+            elif stddev_type == const.StdDev.INTER_EVENT:
+                # this is implied in eq. 21
+                ret.append(np.abs((1 + NL) * tau))
+        return ret
+
+    def _compute_C1_term( self, C, imt,dists ):
+        """
+        Return C1 coeffs as function of Rrup as proposed by Rodriguez-Marek et al (2013)
+        The C1 coeff are used to compute the single station sigma
+        """
+        C1_rrup =0.0
+        if dists.rrup < C['Rc11']:
+            C1_rrup = C['phi_11']
+        elif dists.rrup >= C['Rc11'] and dists.rrup <= C['Rc21']:
+            C1_rrup = C['phi_11'] + (C['phi_21'] - C['phi_11']) * ((dists.rrup - C['Rc11']) / (C['Rc21'] - C['Rc11']))
+        elif dists.rrup > C['Rc21']:
+            C1_rrup = C['phi_21']
+        return C1_rrup
+
+    def _compute_phi_ss( self, C, rup, C1_rrup ,imt):
+        """
+        Return C1 coeffs as function of Rrup as proposed by Rodriguez-Marek et al (2013)
+        The C1 coeff are used to compute the single station sigma
+        retunr phi_ss in log10 units
+        """
+        phi_ss = 0
+
+        if rup.mag < C['Mc1']:
+            phi_ss = C1_rrup
+        elif rup.mag >= C['Mc1'] and rup.mag <= C['Mc2']:
+            phi_ss = C1_rrup + (C['C2'] - C1_rrup) * ((rup.mag - C['Mc1']) / (C['Mc2'] - C['Mc1']))
+        elif rup.mag > C['Mc2']:
+            phi_ss = C['C2']
+        return (phi_ss)
+
+    COEFFS_FS_ROCK = CoeffsTable(sa_damping=5, table="""\
+ IMT     k_adj           a1              a2              b1              b2              Rm             phi_11   phi_21   C2       Mc1  Mc2 Rc11    Rc21  phi_SS
+ pga     0.770968000     6.308282E+00    1.000000E+00    9.814496E-01    -7.784689E-01   7.056087E+01   0.58000  0.47000  0.35000  5    7   16      36    0.46000
+ 0.010   0.770968000     6.308282E+00    1.000000E+00    9.814496E-01    -7.784689E-01   7.056087E+01   0.58000  0.47000  0.35000  5    7   16      36    0.46000
+ 0.050   0.781884504     6.242341E+00    1.000000E+00    9.792917E-01    -7.239180E-01   7.736220E+01   0.55204  0.44903  0.40592  5    7   16      36    0.45301
+ 0.100   0.745908877     5.332961E+00    1.000000E+00    9.742506E-01    -1.092188E+00   4.880096E+01   0.54000  0.44000  0.43000  5    7   16      36    0.45000
+ 0.150   0.744117229     4.545627E+00    1.000000E+00    9.824773E-01    -9.934861E-01   5.436996E+01   0.58095  0.47510  0.40075  5    7   16      36    0.46755
+ 0.200   0.744577747     3.987006E+00    1.000000E+00    9.883142E-01    -9.234564E-01   5.832123E+01   0.61000  0.50000  0.38000  5    7   16      36    0.48000
+ 0.250   0.748103885     3.824292E+00    1.000000E+00    9.902861E-01    -8.590989E-01   6.387936E+01   0.62651  0.50000  0.37450  5    7   16      36    0.48000
+ 0.300   0.755136175     3.691346E+00    1.000000E+00    9.918973E-01    -8.065151E-01   6.842068E+01   0.64000  0.50000  0.37000  5    7   16      36    0.48000
+ 0.400   0.767879693     4.056852E+00    1.000000E+00    9.932212E-01    -8.277473E-01   6.639628E+01   0.61747  0.48874  0.37000  5    7   16      36    0.46874
+ 0.500   0.778052686     3.955542E+00    1.000000E+00    9.943901E-01    -7.686919E-01   7.702964E+01   0.60000  0.48000  0.37000  5    7   16      36    0.46000
+ 0.750   0.796961618     3.771458E+00    1.000000E+00    9.965141E-01    -6.613849E-01   9.635109E+01   0.56490  0.46245  0.38755  5    7   16      36    0.45415
+ 1.000   0.804115657     3.640847E+00    1.000000E+00    9.980211E-01    -5.852493E-01   1.100599E+02   0.54000  0.45000  0.40000  5    7   16      36    0.45000
+ 1.500   0.806238935     3.010737E+00    1.000000E+00    9.987325E-01    -5.862774E-01   1.098648E+02   0.53631  0.43155  0.40000  5    7   16      36    0.43524
+ 2.000   0.809163942     2.563667E+00    1.000000E+00    9.992372E-01    -5.870069E-01   1.097264E+02   0.53369  0.41845  0.40000  5    7   16      36    0.42476
+ 3.000   0.822779154     2.563667E+00    1.000000E+00    9.992372E-01    -5.870069E-01   1.097264E+02   0.53000  0.40000  0.40000  5    7   16      36    0.41000
+ 4.000   0.835713694     2.563667E+00    1.000000E+00    9.992372E-01    -5.870069E-01   1.097264E+02   0.53000  0.40000  0.40000  5    7   16      36    0.41000
+ 5.000   0.847331737     2.563667E+00    1.000000E+00    9.992372E-01    -5.870069E-01   1.097264E+02   0.53000  0.40000  0.40000  5    7   16      36    0.41000
+ 7.500   0.874425160     2.563667E+00    1.000000E+00    9.992372E-01    -5.870069E-01   1.097264E+02   0.53000  0.40000  0.40000  5    7   16      36    0.41000
+ 10.00   0.894172022     2.563667E+00    1.000000E+00    9.992372E-01    -5.870069E-01   1.097264E+02   0.53000  0.40000  0.40000  5    7   16      36    0.41000
+
+    """)
+class ChiouYoungs2008SWISS06(ChiouYoungs2008):
+    """
+    --------------------------------------------------------------------
+    This class implments an extension of the Chiou & Youngs (2008) model,
+    adjusted to be used for the new Swiss Hazard Model [2014].
+    1) kappa value
+       K-adjustments corresponding to model 06 (mid model)- as prepared by Ben Edwards 
+       K-value for PGA were not provided but infered from SA[]0.01s]
+       the model considers a fixed value of vs30=1100m/s
+    2) small-magnitude correction
+    3) single station sigma - mean inter-event adjustment
+    4) single station sigma - inter-event magnitude/distance dependent
+    ------------------------------------------------------------------------
+    Disclaimer: these equations are modified to be used for the 
+    new Swiss Seismic Hazard Model [2014]. 
+    The use of these models is the soly responsability of the hazard modeler.
+    --------------------------------------------------------------------
+    Model implmented by laurentiu.danciu@sed.ethz.ch 
+    --------------------------------------------------------------------
+    """
+    def get_mean_and_stddevs(self, sites, rup, dists, imt, stddev_types):
+
+        C_ADJ = self.COEFFS_FS_ROCK[imt]
+        C = self.COEFFS[imt]
+        C1_rrup =self._compute_C1_term(C_ADJ,imt, dists)
+        phi_ss = self._compute_phi_ss(C_ADJ, rup, C1_rrup, imt)
+        
+        ln_y_ref = self._get_ln_y_ref(rup, dists, self.COEFFS[imt])
+
+        exp1 = np.exp(C['phi3'] * (sites.vs30.clip(-np.inf, 1130) - 360))
+
+        exp2 = np.exp(C['phi3'] * (1130 - 360))
+        
+        mean, stddevs = super(ChiouYoungs2008SWISS06,self).\
+        get_mean_and_stddevs(sites,rup,dists,imt,stddev_types)
+
+        mean_corr =  np.exp(mean) * C_ADJ['k_adj'] * self._compute_small_mag_correction_term(C_ADJ, rup.mag, dists.rrup)
+        mean = np.log(mean_corr)
+
+        std_corr = self._get_corr_stddevs(C, rup, stddev_types,ln_y_ref, exp1, exp2, phi_ss, sites)
+        stddevs = np.array(std_corr)
+
+        return mean, stddevs
+    
+    def _compute_small_mag_correction_term(self,C,mag,rrup):
+        """
+        small magnitude correction applied to the median values
+        """        
+        if mag >= 3.00 and mag < 5.5:
+          return 1 / np.exp(((5.50-mag)/C['a1'])**C['a2']*(C['b1'] + C['b2'] * np.log(np.maximum(np.minimum(rrup, C['Rm']), 10)/20)))
+        elif mag >= 5.50:
+          return 1
+        else:
+          return 1
+
+    def _get_corr_stddevs( self, C, rup, stddev_types, ln_y_ref, exp1, exp2,phi_ss, sites):
+        """
+        Return standard deviations adjusted for single station sigma
+        as the total standard deviation - as proposed to be used in 
+        the new Swiss Hazard Model [2014].
+        """
+        # aftershock flag is zero, we consider only main shock.
+        AS = 0
+        Fmeasured = sites.vs30measured
+        Finferred = 1 - sites.vs30measured
+
+        # eq. 19 to calculate inter-event standard error
+        mag_test = min(max(rup.mag, 5.0), 7.0) - 5.0
+        tau = C['tau1'] + (C['tau2'] - C['tau1']) / 2 * mag_test
+
+        # b and c coeffs from eq. 10
+        b = C['phi2'] * (exp1 - exp2)
+        c = C['phi4']
+
+        y_ref = np.exp(ln_y_ref)
+        # eq. 20
+        NL = b * y_ref / (y_ref + c)
+        ret = []
+        for stddev_type in stddev_types:
+            assert stddev_type in self.DEFINED_FOR_STANDARD_DEVIATION_TYPES
+            if stddev_type == const.StdDev.TOTAL:
+                # eq. 21
+                ret += [np.sqrt(((1 + NL) ** 2) * (tau ** 2) + (phi_ss ** 2))]
+            elif stddev_type == const.StdDev.INTRA_EVENT:
+                ret.append(phi_ss)
+            elif stddev_type == const.StdDev.INTER_EVENT:
+                # this is implied in eq. 21
+                ret.append(np.abs((1 + NL) * tau))
+        return ret
+
+    def _compute_C1_term( self, C, imt,dists ):
+        """
+        Return C1 coeffs as function of Rrup as proposed by Rodriguez-Marek et al (2013)
+        The C1 coeff are used to compute the single station sigma
+        """
+        C1_rrup =0.0
+        if dists.rrup < C['Rc11']:
+            C1_rrup = C['phi_11']
+        elif dists.rrup >= C['Rc11'] and dists.rrup <= C['Rc21']:
+            C1_rrup = C['phi_11'] + (C['phi_21'] - C['phi_11']) * ((dists.rrup - C['Rc11']) / (C['Rc21'] - C['Rc11']))
+        elif dists.rrup > C['Rc21']:
+            C1_rrup = C['phi_21']
+        return C1_rrup
+
+    def _compute_phi_ss( self, C, rup, C1_rrup ,imt):
+        """
+        Return C1 coeffs as function of Rrup as proposed by Rodriguez-Marek et al (2013)
+        The C1 coeff are used to compute the single station sigma
+        retunr phi_ss in log10 units
+        """
+        phi_ss = 0
+
+        if rup.mag < C['Mc1']:
+            phi_ss = C1_rrup
+        elif rup.mag >= C['Mc1'] and rup.mag <= C['Mc2']:
+            phi_ss = C1_rrup + (C['C2'] - C1_rrup) * ((rup.mag - C['Mc1']) / (C['Mc2'] - C['Mc1']))
+        elif rup.mag > C['Mc2']:
+            phi_ss = C['C2']
+        return (phi_ss)
+
     
     COEFFS_FS_ROCK = CoeffsTable(sa_damping=5, table="""\
- IMT     k_adj           a1              a2              b1              b2              Rm
- pga     0.770968000     6.308282E+00    1.000000E+00    9.814496E-01    -7.784689E-01   7.056087E+01
- 0.020   0.793513909     5.814124E+00    1.000000E+00    9.827031E-01    -7.488700E-01   7.429029E+01
- 0.030   0.837956620     5.516911E+00    1.000000E+00    9.834009E-01    -5.363280E-01   1.261408E+02
- 0.040   0.821309964     5.915809E+00    1.000000E+00    9.811304E-01    -6.379811E-01   9.967044E+01
- 0.050   0.781884504     6.242341E+00    1.000000E+00    9.792917E-01    -7.239180E-01   7.736220E+01
- 0.075   0.754108442     5.710388E+00    1.000000E+00    9.763428E-01    -9.393419E-01   6.065494E+01
- 0.100   0.745908877     5.332961E+00    1.000000E+00    9.742506E-01    -1.092188E+00   4.880096E+01
- 0.150   0.744117229     4.545627E+00    1.000000E+00    9.824773E-01    -9.934861E-01   5.436996E+01
- 0.200   0.744577747     3.987006E+00    1.000000E+00    9.883142E-01    -9.234564E-01   5.832123E+01
- 0.250   0.748103885     3.824292E+00    1.000000E+00    9.902861E-01    -8.590989E-01   6.387936E+01
- 0.300   0.755136175     3.691346E+00    1.000000E+00    9.918973E-01    -8.065151E-01   6.842068E+01
- 0.400   0.767879693     4.056852E+00    1.000000E+00    9.932212E-01    -8.277473E-01   6.639628E+01
- 0.500   0.778052686     3.955542E+00    1.000000E+00    9.943901E-01    -7.686919E-01   7.702964E+01
- 0.750   0.796961618     3.771458E+00    1.000000E+00    9.965141E-01    -6.613849E-01   9.635109E+01
- 1.000   0.804115657     3.640847E+00    1.000000E+00    9.980211E-01    -5.852493E-01   1.100599E+02
- 1.500   0.806238935     3.010737E+00    1.000000E+00    9.987325E-01    -5.862774E-01   1.098648E+02
- 2.000   0.809163942     2.563667E+00    1.000000E+00    9.992372E-01    -5.870069E-01   1.097264E+02
- 3.000   0.822779154     2.563667E+00    1.000000E+00    9.992372E-01    -5.870069E-01   1.097264E+02
- 4.000   0.835713694     2.563667E+00    1.000000E+00    9.992372E-01    -5.870069E-01   1.097264E+02
- 5.000   0.847331737     2.563667E+00    1.000000E+00    9.992372E-01    -5.870069E-01   1.097264E+02
- 7.500   0.874425160     2.563667E+00    1.000000E+00    9.992372E-01    -5.870069E-01   1.097264E+02
- 10.00   0.894172022     2.563667E+00    1.000000E+00    9.992372E-01    -5.870069E-01   1.097264E+02
-
+ IMT     k_adj                   a1              a2              b1              b2              Rm     phi_11   phi_21   C2       Mc1  Mc2 Rc11    Rc21 phi_SS
+ pga     0.907406000     6.308282E+00    1.000000E+00    9.814496E-01    -7.784689E-01   7.056087E+01   0.58000  0.47000  0.35000  5    7   16      36   0.46000
+ 0.010   0.907406000     6.308282E+00    1.000000E+00    9.814496E-01    -7.784689E-01   7.056087E+01   0.58000  0.47000  0.35000  5    7   16      36   0.46000
+ 0.050   1.052062325     6.242341E+00    1.000000E+00    9.792917E-01    -7.239180E-01   7.736220E+01   0.55204  0.44903  0.40592  5    7   16      36   0.45301
+ 0.100   0.903944171     5.332961E+00    1.000000E+00    9.742506E-01    -1.092188E+00   4.880096E+01   0.54000  0.44000  0.43000  5    7   16      36   0.45000
+ 0.150   0.846557682     4.545627E+00    1.000000E+00    9.824773E-01    -9.934861E-01   5.436996E+01   0.58095  0.47510  0.40075  5    7   16      36   0.46755
+ 0.200   0.8152693       3.987006E+00    1.000000E+00    9.883142E-01    -9.234564E-01   5.832123E+01   0.61000  0.50000  0.38000  5    7   16      36   0.48000
+ 0.250   0.797908534     3.824292E+00    1.000000E+00    9.902861E-01    -8.590989E-01   6.387936E+01   0.62651  0.50000  0.37450  5    7   16      36   0.48000
+ 0.300   0.789245393     3.691346E+00    1.000000E+00    9.918973E-01    -8.065151E-01   6.842068E+01   0.64000  0.50000  0.37000  5    7   16      36   0.48000
+ 0.400   0.78042074      4.056852E+00    1.000000E+00    9.932212E-01    -8.277473E-01   6.639628E+01   0.61747  0.48874  0.37000  5    7   16      36   0.46874
+ 0.500   0.777925382     3.955542E+00    1.000000E+00    9.943901E-01    -7.686919E-01   7.702964E+01   0.60000  0.48000  0.37000  5    7   16      36   0.46000
+ 0.750   0.786471408     3.771458E+00    1.000000E+00    9.965141E-01    -6.613849E-01   9.635109E+01   0.56490  0.46245  0.38755  5    7   16      36   0.45415
+ 1.000   0.804234088     3.640847E+00    1.000000E+00    9.980211E-01    -5.852493E-01   1.100599E+02   0.54000  0.45000  0.40000  5    7   16      36   0.45000
+ 1.500   0.839944334     3.010737E+00    1.000000E+00    9.987325E-01    -5.862774E-01   1.098648E+02   0.53631  0.43155  0.40000  5    7   16      36   0.43524
+ 2.000   0.865068228     2.563667E+00    1.000000E+00    9.992372E-01    -5.870069E-01   1.097264E+02   0.53369  0.41845  0.40000  5    7   16      36   0.42476
+ 3.000   0.893179655     2.563667E+00    1.000000E+00    9.992372E-01    -5.870069E-01   1.097264E+02   0.53000  0.40000  0.40000  5    7   16      36   0.41000
+ 4.000   0.904833501     2.563667E+00    1.000000E+00    9.992372E-01    -5.870069E-01   1.097264E+02   0.53000  0.40000  0.40000  5    7   16      36   0.41000
+ 5.000   0.911805616     2.563667E+00    1.000000E+00    9.992372E-01    -5.870069E-01   1.097264E+02   0.53000  0.40000  0.40000  5    7   16      36   0.41000
+ 7.500   0.929535851     2.563667E+00    1.000000E+00    9.992372E-01    -5.870069E-01   1.097264E+02   0.53000  0.40000  0.40000  5    7   16      36   0.41000
+ 10.00   0.942324350     2.563667E+00    1.000000E+00    9.992372E-01    -5.870069E-01   1.097264E+02   0.53000  0.40000  0.40000  5    7   16      36   0.41000
     """)
 class ChiouYoungs2008SWISS04(ChiouYoungs2008):
     """
-    K-adjustments corresponding to model 01 - as prepared by Ben Edwards
-    K-value for PGA were not provided but infered from SA[]0.01s]
-    Adjust accordingly!!!  
+    --------------------------------------------------------------------
+    This class implments an extension of the Chiou & Youngs (2008) model,
+    adjusted to be used for the new Swiss Hazard Model [2014].
+    1) kappa value
+       K-adjustments corresponding to model 04 (upper bound) - as prepared by Ben Edwards 
+       K-value for PGA were not provided but infered from SA[]0.01s]
+       the model considers a fixed value of vs30=1100m/s
+    2) small-magnitude correction
+    3) single station sigma - mean inter-event adjustment
+    4) single station sigma - inter-event magnitude/distance dependent
+    ------------------------------------------------------------------------
+    Disclaimer: these equations are modified to be used for the 
+    new Swiss Seismic Hazard Model [2014]. 
+    The use of these models is the soly responsability of the hazard modeler.
+    --------------------------------------------------------------------
+    Model implmented by laurentiu.danciu@sed.ethz.ch 
+    --------------------------------------------------------------------
     """
     def get_mean_and_stddevs(self, sites, rup, dists, imt, stddev_types):
+
         C_ADJ = self.COEFFS_FS_ROCK[imt]
+        C = self.COEFFS[imt]
+        C1_rrup =self._compute_C1_term(C_ADJ,imt, dists)
+        phi_ss = self._compute_phi_ss(C_ADJ, rup, C1_rrup, imt)
+        
+        ln_y_ref = self._get_ln_y_ref(rup, dists, self.COEFFS[imt])
+
+        exp1 = np.exp(C['phi3'] * (sites.vs30.clip(-np.inf, 1130) - 360))
+
+        exp2 = np.exp(C['phi3'] * (1130 - 360))
+        
         mean, stddevs = super(ChiouYoungs2008SWISS04,self).\
         get_mean_and_stddevs(sites,rup,dists,imt,stddev_types)
 
-        #: apply k-correction corresponding to the lower model [01]
         mean_corr =  np.exp(mean) * C_ADJ['k_adj'] * self._compute_small_mag_correction_term(C_ADJ, rup.mag, dists.rrup)
         mean = np.log(mean_corr)
- 
-        stddevs = np.array(stddevs)
+
+        std_corr = self._get_corr_stddevs(C, rup, stddev_types,ln_y_ref, exp1, exp2, phi_ss, sites)
+        stddevs = np.array(std_corr)
+
         return mean, stddevs
     
     def _compute_small_mag_correction_term(self,C,mag,rrup):
+        """
+        small magnitude correction applied to the median values
+        """        
         if mag >= 3.00 and mag < 5.5:
           return 1 / np.exp(((5.50-mag)/C['a1'])**C['a2']*(C['b1'] + C['b2'] * np.log(np.maximum(np.minimum(rrup, C['Rm']), 10)/20)))
         elif mag >= 5.50:
           return 1
         else:
           return 1
-    
+
+    def _get_corr_stddevs( self, C, rup, stddev_types, ln_y_ref, exp1, exp2,phi_ss, sites):
+        """
+        Return standard deviations adjusted for single station sigma
+        as the total standard deviation - as proposed to be used in 
+        the new Swiss Hazard Model [2014].
+        """
+        # aftershock flag is zero, we consider only main shock.
+        AS = 0
+        Fmeasured = sites.vs30measured
+        Finferred = 1 - sites.vs30measured
+
+        # eq. 19 to calculate inter-event standard error
+        mag_test = min(max(rup.mag, 5.0), 7.0) - 5.0
+        tau = C['tau1'] + (C['tau2'] - C['tau1']) / 2 * mag_test
+
+        # b and c coeffs from eq. 10
+        b = C['phi2'] * (exp1 - exp2)
+        c = C['phi4']
+
+        y_ref = np.exp(ln_y_ref)
+        # eq. 20
+        NL = b * y_ref / (y_ref + c)
+        ret = []
+        for stddev_type in stddev_types:
+            assert stddev_type in self.DEFINED_FOR_STANDARD_DEVIATION_TYPES
+            if stddev_type == const.StdDev.TOTAL:
+                # eq. 21
+                ret += [np.sqrt(((1 + NL) ** 2) * (tau ** 2) + (phi_ss ** 2))]
+            elif stddev_type == const.StdDev.INTRA_EVENT:
+                ret.append(phi_ss)
+            elif stddev_type == const.StdDev.INTER_EVENT:
+                # this is implied in eq. 21
+                ret.append(np.abs((1 + NL) * tau))
+        return ret
+
+    def _compute_C1_term( self, C, imt,dists ):
+        """
+        Return C1 coeffs as function of Rrup as proposed by Rodriguez-Marek et al (2013)
+        The C1 coeff are used to compute the single station sigma
+        """
+        C1_rrup =0.0
+        if dists.rrup < C['Rc11']:
+            C1_rrup = C['phi_11']
+        elif dists.rrup >= C['Rc11'] and dists.rrup <= C['Rc21']:
+            C1_rrup = C['phi_11'] + (C['phi_21'] - C['phi_11']) * ((dists.rrup - C['Rc11']) / (C['Rc21'] - C['Rc11']))
+        elif dists.rrup > C['Rc21']:
+            C1_rrup = C['phi_21']
+        return C1_rrup
+
+    def _compute_phi_ss( self, C, rup, C1_rrup ,imt):
+        """
+        Return C1 coeffs as function of Rrup as proposed by Rodriguez-Marek et al (2013)
+        The C1 coeff are used to compute the single station sigma
+        retunr phi_ss in log10 units
+        """
+        phi_ss = 0
+
+        if rup.mag < C['Mc1']:
+            phi_ss = C1_rrup
+        elif rup.mag >= C['Mc1'] and rup.mag <= C['Mc2']:
+            phi_ss = C1_rrup + (C['C2'] - C1_rrup) * ((rup.mag - C['Mc1']) / (C['Mc2'] - C['Mc1']))
+        elif rup.mag > C['Mc2']:
+            phi_ss = C['C2']
+        return (phi_ss)
+
+
     COEFFS_FS_ROCK = CoeffsTable(sa_damping=5, table="""\
- IMT     k_adj                   a1              a2              b1              b2              Rm
- pga     0.907406000     6.308282E+00    1.000000E+00    9.814496E-01    -7.784689E-01   7.056087E+01
- 0.020   0.995631289     5.814124E+00    1.000000E+00    9.827031E-01    -7.488700E-01   7.429029E+01
- 0.030   1.130030199     5.516911E+00    1.000000E+00    9.834009E-01    -5.363280E-01   1.261408E+02
- 0.040   1.117024265     5.915809E+00    1.000000E+00    9.811304E-01    -6.379811E-01   9.967044E+01
- 0.050   1.052062325     6.242341E+00    1.000000E+00    9.792917E-01    -7.239180E-01   7.736220E+01
- 0.075   0.957832222     5.710388E+00    1.000000E+00    9.763428E-01    -9.393419E-01   6.065494E+01
- 0.100   0.903944171     5.332961E+00    1.000000E+00    9.742506E-01    -1.092188E+00   4.880096E+01
- 0.150   0.846557682     4.545627E+00    1.000000E+00    9.824773E-01    -9.934861E-01   5.436996E+01
- 0.200   0.8152693       3.987006E+00    1.000000E+00    9.883142E-01    -9.234564E-01   5.832123E+01
- 0.250   0.797908534     3.824292E+00    1.000000E+00    9.902861E-01    -8.590989E-01   6.387936E+01
- 0.300   0.789245393     3.691346E+00    1.000000E+00    9.918973E-01    -8.065151E-01   6.842068E+01
- 0.400   0.78042074      4.056852E+00    1.000000E+00    9.932212E-01    -8.277473E-01   6.639628E+01
- 0.500   0.777925382     3.955542E+00    1.000000E+00    9.943901E-01    -7.686919E-01   7.702964E+01
- 0.750   0.786471408     3.771458E+00    1.000000E+00    9.965141E-01    -6.613849E-01   9.635109E+01
- 1.000   0.804234088     3.640847E+00    1.000000E+00    9.980211E-01    -5.852493E-01   1.100599E+02
- 1.500   0.839944334     3.010737E+00    1.000000E+00    9.987325E-01    -5.862774E-01   1.098648E+02
- 2.000   0.865068228     2.563667E+00    1.000000E+00    9.992372E-01    -5.870069E-01   1.097264E+02
- 3.000   0.893179655     2.563667E+00    1.000000E+00    9.992372E-01    -5.870069E-01   1.097264E+02
- 4.000   0.904833501     2.563667E+00    1.000000E+00    9.992372E-01    -5.870069E-01   1.097264E+02
- 5.000   0.911805616     2.563667E+00    1.000000E+00    9.992372E-01    -5.870069E-01   1.097264E+02
- 7.500   0.929535851     2.563667E+00    1.000000E+00    9.992372E-01    -5.870069E-01   1.097264E+02
- 10.00   0.942324350     2.563667E+00    1.000000E+00    9.992372E-01    -5.870069E-01   1.097264E+02 
-    """)
-class ChiouYoungs2008SWISS08(ChiouYoungs2008):
+IMT     k_adj                   a1              a2              b1              b2              Rm      phi_11   phi_21   C2       Mc1  Mc2 Rc11    Rc21  phi_SS
+pga     1.144220000    6.308282E+00    1.000000E+00    9.814496E-01    -7.784689E-01   7.056087E+01     0.58000  0.47000  0.35000  5    7   16      36    0.46000
+0.010   1.144220000    6.308282E+00    1.000000E+00    9.814496E-01    -7.784689E-01   7.056087E+01     0.58000  0.47000  0.35000  5    7   16      36    0.46000
+0.050   1.582364006    6.242341E+00    1.000000E+00    9.792917E-01    -7.239180E-01   7.736220E+01     0.55204  0.44903  0.40592  5    7   16      36    0.45301
+0.100   1.134260083    5.332961E+00    1.000000E+00    9.742506E-01    -1.092188E+00   4.880096E+01     0.54000  0.44000  0.43000  5    7   16      36    0.45000
+0.150   0.997131538    4.545627E+00    1.000000E+00    9.824773E-01    -9.934861E-01   5.436996E+01     0.58095  0.47510  0.40075  5    7   16      36    0.46755
+0.200   0.931483355    3.987006E+00    1.000000E+00    9.883142E-01    -9.234564E-01   5.832123E+01     0.61000  0.50000  0.38000  5    7   16      36    0.48000
+0.250   0.896609692    3.824292E+00    1.000000E+00    9.902861E-01    -8.590989E-01   6.387936E+01     0.62651  0.50000  0.37450  5    7   16      36    0.48000
+0.300   0.879037052    3.691346E+00    1.000000E+00    9.918973E-01    -8.065151E-01   6.842068E+01     0.64000  0.50000  0.37000  5    7   16      36    0.48000
+0.400   0.861457717    4.056852E+00    1.000000E+00    9.932212E-01    -8.277473E-01   6.639628E+01     0.61747  0.48874  0.37000  5    7   16      36    0.46874
+0.500   0.853567498    3.955542E+00    1.000000E+00    9.943901E-01    -7.686919E-01   7.702964E+01     0.60000  0.48000  0.37000  5    7   16      36    0.46000
+0.750   0.848145374    3.771458E+00    1.000000E+00    9.965141E-01    -6.613849E-01   9.635109E+01     0.56490  0.46245  0.38755  5    7   16      36    0.45415
+1.000   0.842662116    3.640847E+00    1.000000E+00    9.980211E-01    -5.852493E-01   1.100599E+02     0.54000  0.45000  0.40000  5    7   16      36    0.45000
+1.500   0.831445701    3.010737E+00    1.000000E+00    9.987325E-01    -5.862774E-01   1.098648E+02     0.53631  0.43155  0.40000  5    7   16      36    0.43524
+2.000   0.827607473    2.563667E+00    1.000000E+00    9.992372E-01    -5.870069E-01   1.097264E+02     0.53369  0.41845  0.40000  5    7   16      36    0.42476
+3.000   0.835774855    2.563667E+00    1.000000E+00    9.992372E-01    -5.870069E-01   1.097264E+02     0.53000  0.40000  0.40000  5    7   16      36    0.41000
+4.000   0.848240349    2.563667E+00    1.000000E+00    9.992372E-01    -5.870069E-01   1.097264E+02     0.53000  0.40000  0.40000  5    7   16      36    0.41000
+5.000   0.861360769    2.563667E+00    1.000000E+00    9.992372E-01    -5.870069E-01   1.097264E+02     0.53000  0.40000  0.40000  5    7   16      36    0.41000
+7.500   0.892087590    2.563667E+00    1.000000E+00    9.992372E-01    -5.870069E-01   1.097264E+02     0.53000  0.40000  0.40000  5    7   16      36    0.41000
+10.00   0.914551086    2.563667E+00    1.000000E+00    9.992372E-01    -5.870069E-01   1.097264E+02     0.53000  0.40000  0.40000  5    7   16      36    0.41000
+    """)    
+class ChiouYoungs2008SWISS01T(ChiouYoungs2008SWISS01):
     """
-    K-adjustments corresponding to model 01 - as prepared by Ben Edwards
-    K-value for PGA were not provided but infered from SA[]0.01s]
-    Adjust accordingly!!!  
+    --------------------------------------------------------------------
+    This class implments an extension of the Chiou & Youngs(2008) model,
+    adjusted to be used for the new Swiss Hazard Model [2014].
+    1) kappa value
+       K-adjustments corresponding to model 01 - as prepared by Ben Edwards 
+       K-value for PGA were not provided but infered from SA[]0.01s]
+       the model considers a fixed value of vs30=1100m/s
+    2) small-magnitude correction
+    3) single station sigma - mean inter-event adjustment
+    4) single station sigma - inter-event magnitude/distance dependent
+    --------------------------------------------------------------------
+    This implmentation of the CY2008 Model considers the mean inter-event
+    adjustement when computing the single station sigma (reported as total
+    standard deviation))
+    ------------------------------------------------------------------------
+    Disclaimer: these equations are modified to be used for the 
+    new Swiss Seismic Hazard Model [2014]. 
+    The use of these models is the soly responsability of the hazard modeler.
+    --------------------------------------------------------------------
+    Model implmented by laurentiu.danciu@sed.ethz.ch 
+    --------------------------------------------------------------------
+    """
+
+    def get_mean_and_stddevs(self, sites, rup, dists, imt, stddev_types):
+
+        C_ADJ = self.COEFFS_FS_ROCK[imt]
+        
+        C = self.COEFFS[imt]
+        
+        ln_y_ref = self._get_ln_y_ref(rup, dists, C)
+        exp1 = np.exp(C['phi3'] * (sites.vs30.clip(-np.inf, 1130) - 360))
+        exp2 = np.exp(C['phi3'] * (1130 - 360))
+        
+        mean, stddevs = super(ChiouYoungs2008SWISS01T,self).\
+        get_mean_and_stddevs(sites,rup,dists,imt,stddev_types)
+
+
+        std_corr = self._get_corr_stddevs(C, rup, stddev_types,ln_y_ref, exp1, exp2, C_ADJ['phi_SS'], sites)
+        stddevs = np.array(std_corr)
+
+        return mean, stddevs
+        
+class ChiouYoungs2008SWISS06T(ChiouYoungs2008SWISS06):
+    """
+    --------------------------------------------------------------------
+    This class implments an extension of the Chiou & Youngs(2008) model,
+    adjusted to be used for the new Swiss Hazard Model [2014].
+    1) kappa value
+       K-adjustments corresponding to model 06 (mid model)- as prepared by Ben Edwards 
+       K-value for PGA were not provided but infered from SA[]0.01s]
+       the model considers a fixed value of vs30=1100m/s
+    2) small-magnitude correction
+    3) single station sigma - mean inter-event adjustment
+    4) single station sigma - inter-event magnitude/distance dependent
+    --------------------------------------------------------------------
+    This implmentation of the CY2008 Model considers the mean inter-event
+    adjustement when computing the single station sigma (reported as total
+    standard deviation))
+    ------------------------------------------------------------------------
+    Disclaimer: these equations are modified to be used for the 
+    new Swiss Seismic Hazard Model [2014]. 
+    The use of these models is the soly responsability of the hazard modeler.
+    --------------------------------------------------------------------
+    Model implmented by laurentiu.danciu@sed.ethz.ch 
+    --------------------------------------------------------------------
     """
     def get_mean_and_stddevs(self, sites, rup, dists, imt, stddev_types):
+
         C_ADJ = self.COEFFS_FS_ROCK[imt]
-        mean, stddevs = super(ChiouYoungs2008SWISS08,self).\
+        C = self.COEFFS[imt]
+
+        C1_rrup =self._compute_C1_term(C_ADJ,imt, dists)
+        phi_ss = self._compute_phi_ss(C_ADJ, rup, C1_rrup, imt)
+        
+        ln_y_ref = self._get_ln_y_ref(rup, dists, self.COEFFS[imt])
+        exp1 = np.exp(C['phi3'] * (sites.vs30.clip(-np.inf, 1130) - 360))
+        exp2 = np.exp(C['phi3'] * (1130 - 360))
+        
+        mean, stddevs = super(ChiouYoungs2008SWISS06T,self).\
         get_mean_and_stddevs(sites,rup,dists,imt,stddev_types)
-        #: apply k-correction corresponding to the lower model [01]
-        mean_corr =  np.exp(mean) * C_ADJ['k_adj'] * self._compute_small_mag_correction_term(C_ADJ, rup.mag, dists.rrup)
-        mean = np.log(mean_corr)
- 
-        stddevs = np.array(stddevs)
+
+
+        std_corr = self._get_corr_stddevs(C, rup, stddev_types,ln_y_ref, exp1, exp2, C_ADJ['phi_SS'], sites)
+        stddevs = np.array(std_corr)
+
         return mean, stddevs
-    
-    def _compute_small_mag_correction_term(self,C,mag,rrup):
-        if mag >= 3.00 and mag < 5.5:
-          return 1 / np.exp(((5.50-mag)/C['a1'])**C['a2']* (C['b1'] + C['b2'] * np.log(np.maximum(np.minimum(rrup, C['Rm']), 10)/20)))
-          print mag
-        elif mag >= 5.50:
-          return 1
-        else:
-          return 1
-    
-    COEFFS_FS_ROCK = CoeffsTable(sa_damping=5, table="""\
-IMT     k_adj                   a1              a2              b1              b2              Rm
-pga     1.144220000    6.308282E+00    1.000000E+00    9.814496E-01    -7.784689E-01   7.056087E+01
-0.020   1.302903151    5.814124E+00    1.000000E+00    9.827031E-01    -7.488700E-01   7.429029E+01
-0.030   1.598794928    5.516911E+00    1.000000E+00    9.834009E-01    -5.363280E-01   1.261408E+02
-0.040   1.660100682    5.915809E+00    1.000000E+00    9.811304E-01    -6.379811E-01   9.967044E+01
-0.050   1.582364006    6.242341E+00    1.000000E+00    9.792917E-01    -7.239180E-01   7.736220E+01
-0.075   1.283727945    5.710388E+00    1.000000E+00    9.763428E-01    -9.393419E-01   6.065494E+01
-0.100   1.134260083    5.332961E+00    1.000000E+00    9.742506E-01    -1.092188E+00   4.880096E+01
-0.150   0.997131538    4.545627E+00    1.000000E+00    9.824773E-01    -9.934861E-01   5.436996E+01
-0.200   0.931483355    3.987006E+00    1.000000E+00    9.883142E-01    -9.234564E-01   5.832123E+01
-0.250   0.896609692    3.824292E+00    1.000000E+00    9.902861E-01    -8.590989E-01   6.387936E+01
-0.300   0.879037052    3.691346E+00    1.000000E+00    9.918973E-01    -8.065151E-01   6.842068E+01
-0.400   0.861457717    4.056852E+00    1.000000E+00    9.932212E-01    -8.277473E-01   6.639628E+01
-0.500   0.853567498    3.955542E+00    1.000000E+00    9.943901E-01    -7.686919E-01   7.702964E+01
-0.750   0.848145374    3.771458E+00    1.000000E+00    9.965141E-01    -6.613849E-01   9.635109E+01
-1.000   0.842662116    3.640847E+00    1.000000E+00    9.980211E-01    -5.852493E-01   1.100599E+02
-1.500   0.831445701    3.010737E+00    1.000000E+00    9.987325E-01    -5.862774E-01   1.098648E+02
-2.000   0.827607473    2.563667E+00    1.000000E+00    9.992372E-01    -5.870069E-01   1.097264E+02
-3.000   0.835774855    2.563667E+00    1.000000E+00    9.992372E-01    -5.870069E-01   1.097264E+02
-4.000   0.848240349    2.563667E+00    1.000000E+00    9.992372E-01    -5.870069E-01   1.097264E+02
-5.000   0.861360769    2.563667E+00    1.000000E+00    9.992372E-01    -5.870069E-01   1.097264E+02
-7.500   0.892087590    2.563667E+00    1.000000E+00    9.992372E-01    -5.870069E-01   1.097264E+02
-10.00   0.914551086     2.563667E+00    1.000000E+00    9.992372E-01    -5.870069E-01   1.097264E+02
-    """)    
+        
+        
+class ChiouYoungs2008SWISS04T(ChiouYoungs2008SWISS04):
+    """
+    --------------------------------------------------------------------
+    This class implments an extension of the Chiou & Youngs(2008) model,
+    adjusted to be used for the new Swiss Hazard Model [2014].
+    1) kappa value
+       K-adjustments corresponding to model 04 (upper bound) - as prepared by Ben Edwards 
+       K-value for PGA were not provided but infered from SA[]0.01s]
+       the model considers a fixed value of vs30=1100m/s
+    2) small-magnitude correction
+    3) single station sigma - mean inter-event adjustment
+    4) single station sigma - inter-event magnitude/distance dependent
+    --------------------------------------------------------------------
+    This implmentation of the CY2008 Model considers the mean inter-event
+    adjustement when computing the single station sigma (reported as total
+    standard deviation))
+    ------------------------------------------------------------------------
+    Disclaimer: these equations are modified to be used for the 
+    new Swiss Seismic Hazard Model [2014]. 
+    The use of these models is the soly responsability of the hazard modeler.
+    --------------------------------------------------------------------
+    Model implmented by laurentiu.danciu@sed.ethz.ch 
+    --------------------------------------------------------------------
+    """
+    def get_mean_and_stddevs(self, sites, rup, dists, imt, stddev_types):
+
+        C_ADJ = self.COEFFS_FS_ROCK[imt]
+        C = self.COEFFS[imt]
+
+        C1_rrup =self._compute_C1_term(C_ADJ,imt, dists)
+        phi_ss = self._compute_phi_ss(C_ADJ, rup, C1_rrup, imt)
+        
+        ln_y_ref = self._get_ln_y_ref(rup, dists, self.COEFFS[imt])
+        exp1 = np.exp(C['phi3'] * (sites.vs30.clip(-np.inf, 1130) - 360))
+        exp2 = np.exp(C['phi3'] * (1130 - 360))
+        
+        mean, stddevs = super(ChiouYoungs2008SWISS04T,self).\
+        get_mean_and_stddevs(sites,rup,dists,imt,stddev_types)
+
+
+        std_corr = self._get_corr_stddevs(C, rup, stddev_types,ln_y_ref, exp1, exp2, C_ADJ['phi_SS'], sites)
+        stddevs = np.array(std_corr)
+
+        return mean, stddevs
