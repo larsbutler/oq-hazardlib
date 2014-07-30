@@ -188,12 +188,11 @@ class EdwardsFah2013Alpine60MPa(GMPE):
             self._compute_term_5(C, mag, term_dist_r)
         )
 
- #: Fixed magnitude terms
-
+    #: Fixed magnitude terms
     M1 = 5.00
     M2 = 4.70
 
- #: Coefficient table as submited by Carlo Cauzzi (no documentation -personal communication)
+    #: Coefficient table as submited by Carlo Cauzzi (no documentation -personal communication)
     COEFFS = CoeffsTable(sa_damping=5, table="""\
 IMT        a1                     a2                      a3                      a4                       a5                       a6                        a7                         a8                      a9                       a10                     a11                       a12                     a13                      a14                      a15                        a16                    a17                       a18                       a19                        a20                      a21                       a22                        a23                        tau     phi_SS  sigma_tot phi_11 phi_21  C2     Mc1 Mc2 Rc11 Rc21
 pgv        -8.65875145149632      7.85817700835325        -4.37604485905558       1.52739461974064         -0.284706616386616       0.0261357301466931        -0.000933130429778511      3.11537783603186        -1.94375128235722        0.352135879004547       -0.0201605473274912       -4.56711247403471       1.58575418689428         -0.233405179755817       0.0134531673741502         1.99257330049254       -0.585055071136962        0.0635009483831737        -0.00290923000116716       -0.323156152322977       0.0803365659780564        -0.00510932500205881       3.79546159737313e-05       0.5010  0.4600  0.68015  0.00000 0.00000 0.00000 5   7   16  36
@@ -713,15 +712,12 @@ class EdwardsFah2013Alpine60MPaMR(EdwardsFah2013Alpine60MPa):
 
         if (dists.rrup < C['Rc11']).any():
             C1_rrup = C['phi_11']
-            #~ print 'case01 rrup< ', C1_rrup
         elif ((dists.rrup >= C['Rc11']).any()
                 and (dists.rrup <= C['Rc21']).any()):
             C1_rrup = C['phi_11'] + (C['phi_21'] - C['phi_11']) * \
                 ((dists.rrup - C['Rc11']) / (C['Rc21'] - C['Rc11']))
-            #~ print 'case02 rrup> < ', C1_rrup
         elif (dists.rrup > C['Rc21']).any():
             C1_rrup = C['phi_21']
-            #~ print 'case03 rrup> ', C1_rrup
         return C1_rrup
 
     def _compute_phi_ss(self, C, rup, C1_rrup, imt):
@@ -734,17 +730,14 @@ class EdwardsFah2013Alpine60MPaMR(EdwardsFah2013Alpine60MPa):
 
         if rup.mag < C['Mc1']:
             phi_ss = C1_rrup
-            #~ print phi_ss
 
         elif rup.mag >= C['Mc1'] and rup.mag <= C['Mc2']:
             phi_ss = C1_rrup + \
                 (C['C2'] - C1_rrup) * \
                 ((rup.mag - C['Mc1']) / (C['Mc2'] - C['Mc1']))
-            #~ print phi_ss
 
         elif rup.mag > C['Mc2']:
             phi_ss = C['C2']
-            #~ print phi_ss
         return phi_ss
 
     def _get_corr_stddevs(self, C, stddev_types, num_sites, phi_ss):
@@ -753,7 +746,6 @@ class EdwardsFah2013Alpine60MPaMR(EdwardsFah2013Alpine60MPa):
         as proposed to be used in the new Swiss Hazard Model [2014].
         """
         stddevs = []
-        #~ print 'tau:',C['tau'], 'phis_ss-->', phi_ss
         for stddev_type in stddev_types:
             assert stddev_type in self.DEFINED_FOR_STANDARD_DEVIATION_TYPES
             if stddev_type == const.StdDev.TOTAL:
@@ -794,15 +786,12 @@ class EdwardsFah2013Alpine10MPaMR(EdwardsFah2013Alpine10MPa):
 
         if (dists.rrup < C['Rc11']).any():
             C1_rrup = C['phi_11']
-            #~ print 'case01 rrup< ', C1_rrup
         elif ((dists.rrup >= C['Rc11']).any()
                 and (dists.rrup <= C['Rc21']).any()):
             C1_rrup = C['phi_11'] + (C['phi_21'] - C['phi_11']) * \
                 ((dists.rrup - C['Rc11']) / (C['Rc21'] - C['Rc11']))
-            #~ print 'case02 rrup> < ', C1_rrup
         elif (dists.rrup > C['Rc21']).any():
             C1_rrup = C['phi_21']
-            #~ print 'case03 rrup> ', C1_rrup
         return C1_rrup
 
     def _compute_phi_ss(self, C, rup, C1_rrup, imt):
@@ -815,17 +804,14 @@ class EdwardsFah2013Alpine10MPaMR(EdwardsFah2013Alpine10MPa):
 
         if rup.mag < C['Mc1']:
             phi_ss = C1_rrup
-            #~ print phi_ss
 
         elif rup.mag >= C['Mc1'] and rup.mag <= C['Mc2']:
             phi_ss = C1_rrup + \
                 (C['C2'] - C1_rrup) * \
                 ((rup.mag - C['Mc1']) / (C['Mc2'] - C['Mc1']))
-            #~ print phi_ss
 
         elif rup.mag > C['Mc2']:
             phi_ss = C['C2']
-            #~ print phi_ss
         return phi_ss
 
     def _get_corr_stddevs(self, C, stddev_types, num_sites, phi_ss):
@@ -834,7 +820,6 @@ class EdwardsFah2013Alpine10MPaMR(EdwardsFah2013Alpine10MPa):
         as proposed to be used in the new Swiss Hazard Model [2014].
         """
         stddevs = []
-        #~ print 'tau:',C['tau'], 'phis_ss-->', phi_ss
         for stddev_type in stddev_types:
             assert stddev_type in self.DEFINED_FOR_STANDARD_DEVIATION_TYPES
             if stddev_type == const.StdDev.TOTAL:
@@ -875,15 +860,12 @@ class EdwardsFah2013Alpine20MPaMR(EdwardsFah2013Alpine20MPa):
 
         if (dists.rrup < C['Rc11']).any():
             C1_rrup = C['phi_11']
-            #~ print 'case01 rrup< ', C1_rrup
         elif ((dists.rrup >= C['Rc11']).any()
                 and (dists.rrup <= C['Rc21']).any()):
             C1_rrup = C['phi_11'] + (C['phi_21'] - C['phi_11']) * \
                 ((dists.rrup - C['Rc11']) / (C['Rc21'] - C['Rc11']))
-            #~ print 'case02 rrup> < ', C1_rrup
         elif (dists.rrup > C['Rc21']).any():
             C1_rrup = C['phi_21']
-            #~ print 'case03 rrup> ', C1_rrup
         return C1_rrup
 
     def _compute_phi_ss(self, C, rup, C1_rrup, imt):
@@ -896,17 +878,14 @@ class EdwardsFah2013Alpine20MPaMR(EdwardsFah2013Alpine20MPa):
 
         if rup.mag < C['Mc1']:
             phi_ss = C1_rrup
-            #~ print phi_ss
 
         elif rup.mag >= C['Mc1'] and rup.mag <= C['Mc2']:
             phi_ss = C1_rrup + \
                 (C['C2'] - C1_rrup) * \
                 ((rup.mag - C['Mc1']) / (C['Mc2'] - C['Mc1']))
-            #~ print phi_ss
 
         elif rup.mag > C['Mc2']:
             phi_ss = C['C2']
-            #~ print phi_ss
         return phi_ss
 
     def _get_corr_stddevs(self, C, stddev_types, num_sites, phi_ss):
@@ -915,7 +894,6 @@ class EdwardsFah2013Alpine20MPaMR(EdwardsFah2013Alpine20MPa):
         as proposed to be used in the new Swiss Hazard Model [2014].
         """
         stddevs = []
-        #~ print 'tau:',C['tau'], 'phis_ss-->', phi_ss
         for stddev_type in stddev_types:
             assert stddev_type in self.DEFINED_FOR_STANDARD_DEVIATION_TYPES
             if stddev_type == const.StdDev.TOTAL:
@@ -956,15 +934,12 @@ class EdwardsFah2013Alpine30MPaMR(EdwardsFah2013Alpine30MPa):
 
         if (dists.rrup < C['Rc11']).any():
             C1_rrup = C['phi_11']
-            #~ print 'case01 rrup< ', C1_rrup
         elif ((dists.rrup >= C['Rc11']).any()
                 and (dists.rrup <= C['Rc21']).any()):
             C1_rrup = C['phi_11'] + (C['phi_21'] - C['phi_11']) * \
                 ((dists.rrup - C['Rc11']) / (C['Rc21'] - C['Rc11']))
-            #~ print 'case02 rrup> < ', C1_rrup
         elif (dists.rrup > C['Rc21']).any():
             C1_rrup = C['phi_21']
-            #~ print 'case03 rrup> ', C1_rrup
         return C1_rrup
 
     def _compute_phi_ss(self, C, rup, C1_rrup, imt):
@@ -977,17 +952,14 @@ class EdwardsFah2013Alpine30MPaMR(EdwardsFah2013Alpine30MPa):
 
         if rup.mag < C['Mc1']:
             phi_ss = C1_rrup
-            #~ print phi_ss
 
         elif rup.mag >= C['Mc1'] and rup.mag <= C['Mc2']:
             phi_ss = C1_rrup + \
                 (C['C2'] - C1_rrup) * \
                 ((rup.mag - C['Mc1']) / (C['Mc2'] - C['Mc1']))
-            #~ print phi_ss
 
         elif rup.mag > C['Mc2']:
             phi_ss = C['C2']
-            #~ print phi_ss
         return phi_ss
 
     def _get_corr_stddevs(self, C, stddev_types, num_sites, phi_ss):
@@ -996,7 +968,6 @@ class EdwardsFah2013Alpine30MPaMR(EdwardsFah2013Alpine30MPa):
         as proposed to be used in the new Swiss Hazard Model [2014].
         """
         stddevs = []
-        #~ print 'tau:',C['tau'], 'phis_ss-->', phi_ss
         for stddev_type in stddev_types:
             assert stddev_type in self.DEFINED_FOR_STANDARD_DEVIATION_TYPES
             if stddev_type == const.StdDev.TOTAL:
@@ -1037,15 +1008,12 @@ class EdwardsFah2013Alpine50MPaMR(EdwardsFah2013Alpine50MPa):
 
         if (dists.rrup < C['Rc11']).any():
             C1_rrup = C['phi_11']
-            #~ print 'case01 rrup< ', C1_rrup
         elif ((dists.rrup >= C['Rc11']).any()
                 and (dists.rrup <= C['Rc21']).any()):
             C1_rrup = C['phi_11'] + (C['phi_21'] - C['phi_11']) * \
                 ((dists.rrup - C['Rc11']) / (C['Rc21'] - C['Rc11']))
-            #~ print 'case02 rrup> < ', C1_rrup
         elif dists.rrup > C['Rc21']:
             C1_rrup = C['phi_21']
-            #~ print 'case03 rrup> ', C1_rrup
         return C1_rrup
 
     def _compute_phi_ss(self, C, rup, C1_rrup, imt):
@@ -1058,17 +1026,14 @@ class EdwardsFah2013Alpine50MPaMR(EdwardsFah2013Alpine50MPa):
 
         if rup.mag < C['Mc1']:
             phi_ss = C1_rrup
-            #~ print phi_ss
 
         elif rup.mag >= C['Mc1'] and rup.mag <= C['Mc2']:
             phi_ss = C1_rrup + \
                 (C['C2'] - C1_rrup) * \
                 ((rup.mag - C['Mc1']) / (C['Mc2'] - C['Mc1']))
-            #~ print phi_ss
 
         elif rup.mag > C['Mc2']:
             phi_ss = C['C2']
-            #~ print phi_ss
         return phi_ss
 
     def _get_corr_stddevs(self, C, stddev_types, num_sites, phi_ss):
@@ -1077,7 +1042,6 @@ class EdwardsFah2013Alpine50MPaMR(EdwardsFah2013Alpine50MPa):
         as proposed to be used in the new Swiss Hazard Model [2014].
         """
         stddevs = []
-        #~ print 'tau:',C['tau'], 'phis_ss-->', phi_ss
         for stddev_type in stddev_types:
             assert stddev_type in self.DEFINED_FOR_STANDARD_DEVIATION_TYPES
             if stddev_type == const.StdDev.TOTAL:
@@ -1118,15 +1082,12 @@ class EdwardsFah2013Alpine75MPaMR(EdwardsFah2013Alpine75MPa):
 
         if (dists.rrup < C['Rc11']).any():
             C1_rrup = C['phi_11']
-            #~ print 'case01 rrup< ', C1_rrup
         elif ((dists.rrup >= C['Rc11']).any()
                 and (dists.rrup <= C['Rc21']).any()):
             C1_rrup = C['phi_11'] + (C['phi_21'] - C['phi_11']) * \
                 ((dists.rrup - C['Rc11']) / (C['Rc21'] - C['Rc11']))
-            #~ print 'case02 rrup> < ', C1_rrup
         elif (dists.rrup > C['Rc21']).any():
             C1_rrup = C['phi_21']
-            #~ print 'case03 rrup> ', C1_rrup
         return C1_rrup
 
     def _compute_phi_ss(self, C, rup, C1_rrup, imt):
@@ -1139,17 +1100,14 @@ class EdwardsFah2013Alpine75MPaMR(EdwardsFah2013Alpine75MPa):
 
         if rup.mag < C['Mc1']:
             phi_ss = C1_rrup
-            #~ print phi_ss
 
         elif rup.mag >= C['Mc1'] and rup.mag <= C['Mc2']:
             phi_ss = C1_rrup + \
                 (C['C2'] - C1_rrup) * \
                 ((rup.mag - C['Mc1']) / (C['Mc2'] - C['Mc1']))
-            #~ print phi_ss
 
         elif rup.mag > C['Mc2']:
             phi_ss = C['C2']
-            #~ print phi_ss
         return phi_ss
 
     def _get_corr_stddevs(self, C, stddev_types, num_sites, phi_ss):
@@ -1158,7 +1116,6 @@ class EdwardsFah2013Alpine75MPaMR(EdwardsFah2013Alpine75MPa):
         as proposed to be used in the new Swiss Hazard Model [2014].
         """
         stddevs = []
-        #~ print 'tau:',C['tau'], 'phis_ss-->', phi_ss
         for stddev_type in stddev_types:
             assert stddev_type in self.DEFINED_FOR_STANDARD_DEVIATION_TYPES
             if stddev_type == const.StdDev.TOTAL:
@@ -1199,15 +1156,12 @@ class EdwardsFah2013Alpine90MPaMR(EdwardsFah2013Alpine90MPa):
 
         if (dists.rrup < C['Rc11']).any():
             C1_rrup = C['phi_11']
-            #~ print 'case01 rrup< ', C1_rrup
         elif ((dists.rrup >= C['Rc11']).any()
                 and (dists.rrup <= C['Rc21']).any()):
             C1_rrup = C['phi_11'] + (C['phi_21'] - C['phi_11']) * \
                 ((dists.rrup - C['Rc11']) / (C['Rc21'] - C['Rc11']))
-            #~ print 'case02 rrup> < ', C1_rrup
         elif (dists.rrup > C['Rc21']).any():
             C1_rrup = C['phi_21']
-            #~ print 'case03 rrup> ', C1_rrup
         return C1_rrup
 
     def _compute_phi_ss(self, C, rup, C1_rrup, imt):
@@ -1220,17 +1174,14 @@ class EdwardsFah2013Alpine90MPaMR(EdwardsFah2013Alpine90MPa):
 
         if rup.mag < C['Mc1']:
             phi_ss = C1_rrup
-            #~ print phi_ss
 
         elif rup.mag >= C['Mc1'] and rup.mag <= C['Mc2']:
             phi_ss = C1_rrup + \
                 (C['C2'] - C1_rrup) * \
                 ((rup.mag - C['Mc1']) / (C['Mc2'] - C['Mc1']))
-            #~ print phi_ss
 
         elif rup.mag > C['Mc2']:
             phi_ss = C['C2']
-            #~ print phi_ss
         return phi_ss
 
     def _get_corr_stddevs(self, C, stddev_types, num_sites, phi_ss):
@@ -1239,7 +1190,6 @@ class EdwardsFah2013Alpine90MPaMR(EdwardsFah2013Alpine90MPa):
         as proposed to be used in the new Swiss Hazard Model [2014].
         """
         stddevs = []
-        #~ print 'tau:',C['tau'], 'phis_ss-->', phi_ss
         for stddev_type in stddev_types:
             assert stddev_type in self.DEFINED_FOR_STANDARD_DEVIATION_TYPES
             if stddev_type == const.StdDev.TOTAL:
@@ -1280,15 +1230,12 @@ class EdwardsFah2013Alpine120MPaMR(EdwardsFah2013Alpine120MPa):
 
         if (dists.rrup < C['Rc11']).any():
             C1_rrup = C['phi_11']
-            #~ print 'case01 rrup< ', C1_rrup
         elif ((dists.rrup >= C['Rc11']).any()
                 and (dists.rrup <= C['Rc21']).any()):
             C1_rrup = C['phi_11'] + (C['phi_21'] - C['phi_11']) * \
                 ((dists.rrup - C['Rc11']) / (C['Rc21'] - C['Rc11']))
-            #~ print 'case02 rrup> < ', C1_rrup
         elif (dists.rrup > C['Rc21']).any():
             C1_rrup = C['phi_21']
-            #~ print 'case03 rrup> ', C1_rrup
         return C1_rrup
 
     def _compute_phi_ss(self, C, rup, C1_rrup, imt):
@@ -1301,17 +1248,14 @@ class EdwardsFah2013Alpine120MPaMR(EdwardsFah2013Alpine120MPa):
 
         if rup.mag < C['Mc1']:
             phi_ss = C1_rrup
-            #~ print phi_ss
 
         elif rup.mag >= C['Mc1'] and rup.mag <= C['Mc2']:
             phi_ss = C1_rrup + \
                 (C['C2'] - C1_rrup) * \
                 ((rup.mag - C['Mc1']) / (C['Mc2'] - C['Mc1']))
-            #~ print phi_ss
 
         elif rup.mag > C['Mc2']:
             phi_ss = C['C2']
-            #~ print phi_ss
         return phi_ss
 
     def _get_corr_stddevs(self, C, stddev_types, num_sites, phi_ss):
@@ -1320,7 +1264,6 @@ class EdwardsFah2013Alpine120MPaMR(EdwardsFah2013Alpine120MPa):
         as proposed to be used in the new Swiss Hazard Model [2014].
         """
         stddevs = []
-        #~ print 'tau:',C['tau'], 'phis_ss-->', phi_ss
         for stddev_type in stddev_types:
             assert stddev_type in self.DEFINED_FOR_STANDARD_DEVIATION_TYPES
             if stddev_type == const.StdDev.TOTAL:
