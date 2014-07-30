@@ -319,7 +319,6 @@ class AkkarBommer2010SWISS01(AkkarBommer2010):
         std_corr = self._get_corr_stddevs(
             self.COEFFS[imt], stddev_types, len(sites.vs30), phi_ss)
         stddevs = np.log(10 ** np.array(std_corr))
-        print 'phi_ss in log10', phi_ss, 'tau', self.COEFFS[imt], 'std_corr', std_corr, 'stddevs', stddevs
 
         return mean, stddevs
 
@@ -350,7 +349,12 @@ class AkkarBommer2010SWISS01(AkkarBommer2010):
             assert stddev_type in self.DEFINED_FOR_STANDARD_DEVIATION_TYPES
             if stddev_type == const.StdDev.TOTAL:
                 stddevs.append(
-                    np.sqrt(C['Sigma2'] * C['Sigma2'] + phi_ss * phi_ss) + np.zeros(num_sites))
+                    np.sqrt(
+                        C['Sigma2'] *
+                        C['Sigma2'] +
+                        phi_ss *
+                        phi_ss) +
+                    np.zeros(num_sites))
             elif stddev_type == const.StdDev.INTRA_EVENT:
                 stddevs.append(C['Sigma1'] + np.zeros(num_sites))
             elif stddev_type == const.StdDev.INTER_EVENT:
@@ -365,7 +369,6 @@ class AkkarBommer2010SWISS01(AkkarBommer2010):
         C1_rrup = 0.0
         if (dists.rjb < C['Rc11']).any():
             C1_rrup = C['phi_11']
-            print 'case 1 -distance < ', C['Rc11'], 'c1_rup:', C1_rrup
         elif (dists.rjb >= C['Rc11']).any() and (dists.rjb <= C['Rc21']).any():
             C1_rrup = C['phi_11'] + (C['phi_21'] - C['phi_11']) * \
                 ((dists.rjb - C['Rc11']) / (C['Rc21'] - C['Rc11']))
@@ -383,19 +386,17 @@ class AkkarBommer2010SWISS01(AkkarBommer2010):
 
         if rup.mag < C['Mc1']:
             phi_ss = C1_rrup
-            print 'case 1 -magnitude < 5', phi_ss
 
         elif rup.mag >= C['Mc1'] and rup.mag <= C['Mc2']:
             phi_ss = C1_rrup + \
                 (C['C2'] - C1_rrup) * \
                 ((rup.mag - C['Mc1']) / (C['Mc2'] - C['Mc1']))
-            print 'case 02 mag between 5 and 7', phi_ss
         elif rup.mag > C['Mc2']:
             phi_ss = C['C2']
 
         return (phi_ss) / np.log(10)
 
-    COEFFS_FS_ROCK = CoeffsTable( sa_damping=5, table="""\
+    COEFFS_FS_ROCK = CoeffsTable(sa_damping=5, table="""\
     IMT       k_adj     a1              a2              b1               b2             Rm             phi_11         phi_21         C2             Mc1    Mc2    Rc11    Rc21
     pga       0.7523    1.415563E+00    1.239239E+00    9.955898E-01     -2.168473E-01  1.972259E+03   0.58           0.47           0.35           5      7      11      34
     0.0100    0.7523    1.415563E+00    1.239239E+00    9.955898E-01     -2.168473E-01  1.972259E+03   0.58           0.47           0.35           5      7      11      34
@@ -452,7 +453,7 @@ class AkkarBommer2010SWISS01(AkkarBommer2010):
     2.9500    0.8097    -2.863477E+01   1.000000E+00    1.098866E+00     3.627238E+00   1.000000E+09   0.530152985    0.400764925    0.4            5      7      11      34
     3.0000    0.8104    -2.863477E+01   1.000000E+00    1.098866E+00     3.627238E+00   1.000000E+09   0.53           0.4            0.4            5      7      11      34
     4.0000    0.8232    -2.863477E+01   1.000000E+00    1.098866E+00     3.627238E+00   1.000000E+09   0.53           0.4            0.4            5      7      11      34
-    """ )
+    """)
 
 
 class AkkarBommer2010SWISS04(AkkarBommer2010):
@@ -526,7 +527,12 @@ class AkkarBommer2010SWISS04(AkkarBommer2010):
             assert stddev_type in self.DEFINED_FOR_STANDARD_DEVIATION_TYPES
             if stddev_type == const.StdDev.TOTAL:
                 stddevs.append(
-                    np.sqrt(C['Sigma2'] * C['Sigma2'] + phi_ss * phi_ss) + np.zeros(num_sites))
+                    np.sqrt(
+                        C['Sigma2'] *
+                        C['Sigma2'] +
+                        phi_ss *
+                        phi_ss) +
+                    np.zeros(num_sites))
             elif stddev_type == const.StdDev.INTRA_EVENT:
                 stddevs.append(C['Sigma1'] + np.zeros(num_sites))
             elif stddev_type == const.StdDev.INTER_EVENT:
@@ -565,7 +571,7 @@ class AkkarBommer2010SWISS04(AkkarBommer2010):
         elif rup.mag > C['Mc2']:
             phi_ss = C['C2']
         return (phi_ss) / np.log(10)
-    COEFFS_FS_ROCK = CoeffsTable( sa_damping=5, table="""\
+    COEFFS_FS_ROCK = CoeffsTable(sa_damping=5, table="""\
     IMT       k_adj     a1               a2              b1              b2              Rm             phi_11         phi_21         C2             Mc1    Mc2    Rc11    Rc21
     pga       1.1484    1.415563E+00    1.239239E+00    9.955898E-01    -2.168473E-01   1.972259E+03    0.58           0.47           0.35           5      7      11      34
     0.0100    1.1484    1.415563E+00    1.239239E+00    9.955898E-01    -2.168473E-01   1.972259E+03    0.58           0.47           0.35           5      7      11      34
@@ -622,7 +628,7 @@ class AkkarBommer2010SWISS04(AkkarBommer2010):
     2.9500    0.8245    -2.863477E+01   1.000000E+00    1.098866E+00    3.627238E+00    1.000000E+09    0.530152985    0.400764925    0.4            5      7      11      34
     3.0000    0.8250    -2.863477E+01   1.000000E+00    1.098866E+00    3.627238E+00    1.000000E+09    0.53           0.4            0.4            5      7      11      34
     4.0000    0.8327    -2.863477E+01   1.000000E+00    1.098866E+00    3.627238E+00    1.000000E+09    0.53           0.4            0.4            5      7      11      34
-    """ )
+    """)
 
 
 class AkkarBommer2010SWISS08(AkkarBommer2010):
@@ -697,7 +703,12 @@ class AkkarBommer2010SWISS08(AkkarBommer2010):
             assert stddev_type in self.DEFINED_FOR_STANDARD_DEVIATION_TYPES
             if stddev_type == const.StdDev.TOTAL:
                 stddevs.append(
-                    np.sqrt(C['Sigma2'] * C['Sigma2'] + phi_ss * phi_ss) + np.zeros(num_sites))
+                    np.sqrt(
+                        C['Sigma2'] *
+                        C['Sigma2'] +
+                        phi_ss *
+                        phi_ss) +
+                    np.zeros(num_sites))
             elif stddev_type == const.StdDev.INTRA_EVENT:
                 stddevs.append(C['Sigma1'] + np.zeros(num_sites))
             elif stddev_type == const.StdDev.INTER_EVENT:
@@ -737,7 +748,7 @@ class AkkarBommer2010SWISS08(AkkarBommer2010):
         elif rup.mag > C['Mc2']:
             phi_ss = C['C2']
         return (phi_ss) / np.log(10)
-    COEFFS_FS_ROCK = CoeffsTable( sa_damping=5, table="""\
+    COEFFS_FS_ROCK = CoeffsTable(sa_damping=5, table="""\
     IMT       k_adj     a1               a2              b1              b2              Rm             phi_11         phi_21         C2             Mc1    Mc2    Rc11    Rc21
     pga       1.3317     1.415563E+00    1.239239E+00    9.955898E-01    -2.168473E-01   1.972259E+03   0.58           0.47           0.35           5      7      11      34
     0.0100    1.3317     1.415563E+00    1.239239E+00    9.955898E-01    -2.168473E-01   1.972259E+03   0.58           0.47           0.35           5      7      11      34
@@ -794,7 +805,7 @@ class AkkarBommer2010SWISS08(AkkarBommer2010):
     2.9500    0.8952     -2.863477E+01   1.000000E+00    1.098866E+00    3.627238E+00    1.000000E+09   0.530152985    0.400764925    0.4            5      7      11      34
     3.0000    0.8963     -2.863477E+01   1.000000E+00    1.098866E+00    3.627238E+00    1.000000E+09   0.53           0.4            0.4            5      7      11      34
     4.0000    0.9146     -2.863477E+01   1.000000E+00    1.098866E+00    3.627238E+00    1.000000E+09   0.53           0.4            0.4            5      7      11      34
-    """ )
+    """)
 
 
 class AkkarBommer2010SWISS01T(AkkarBommer2010SWISS01):
@@ -830,11 +841,13 @@ class AkkarBommer2010SWISS01T(AkkarBommer2010SWISS01):
         """
         C_ADJ = self.COEFFS_PHI_SS[imt]
 
-        mean, stddevs = super(AkkarBommer2010SWISS01T, self).get_mean_and_stddevs(
+        mean, stddevs = super(
+            AkkarBommer2010SWISS01T, self).get_mean_and_stddevs(
             sites, rup, dists, imt, stddev_types)
 
         std_corr = self._get_corr_stddevs(
-            self.COEFFS[imt], stddev_types, len(sites.vs30), (C_ADJ['phi_ss'] / np.log(10)))
+            self.COEFFS[imt], stddev_types, len(
+                sites.vs30), (C_ADJ['phi_ss'] / np.log(10)))
 
         stddevs = np.log(10 ** np.array(std_corr))
 
@@ -851,14 +864,19 @@ class AkkarBommer2010SWISS01T(AkkarBommer2010SWISS01):
             assert stddev_type in self.DEFINED_FOR_STANDARD_DEVIATION_TYPES
             if stddev_type == const.StdDev.TOTAL:
                 stddevs.append(
-                    np.sqrt(C['Sigma2'] * C['Sigma2'] + phi_ss * phi_ss) + np.zeros(num_sites))
+                    np.sqrt(
+                        C['Sigma2'] *
+                        C['Sigma2'] +
+                        phi_ss *
+                        phi_ss) +
+                    np.zeros(num_sites))
             elif stddev_type == const.StdDev.INTRA_EVENT:
                 stddevs.append(C['Sigma1'] + np.zeros(num_sites))
             elif stddev_type == const.StdDev.INTER_EVENT:
                 stddevs.append(C['Sigma2'] + np.zeros(num_sites))
         return stddevs
 
-    COEFFS_PHI_SS = CoeffsTable( sa_damping=5, table="""\
+    COEFFS_PHI_SS = CoeffsTable(sa_damping=5, table="""\
     IMT       phi_ss
     pga       0.46
     0.01      0.46
@@ -926,7 +944,7 @@ class AkkarBommer2010SWISS01T(AkkarBommer2010SWISS01):
     2.95      0.41061194
     3         0.41
     4         0.41
-    """ )
+    """)
 
 
 class AkkarBommer2010SWISS04T(AkkarBommer2010SWISS04):
@@ -962,11 +980,13 @@ class AkkarBommer2010SWISS04T(AkkarBommer2010SWISS04):
         """
         C_ADJ = self.COEFFS_PHI_SS[imt]
 
-        mean, stddevs = super(AkkarBommer2010SWISS04T, self).get_mean_and_stddevs(
+        mean, stddevs = super(
+            AkkarBommer2010SWISS04T, self).get_mean_and_stddevs(
             sites, rup, dists, imt, stddev_types)
 
         std_corr = self._get_corr_stddevs(
-            self.COEFFS[imt], stddev_types, len(sites.vs30), (C_ADJ['phi_ss'] / np.log(10)))
+            self.COEFFS[imt], stddev_types, len(
+                sites.vs30), (C_ADJ['phi_ss'] / np.log(10)))
         stddevs = np.log(10 ** np.array(std_corr))
         return mean, stddevs
 
@@ -981,14 +1001,19 @@ class AkkarBommer2010SWISS04T(AkkarBommer2010SWISS04):
             assert stddev_type in self.DEFINED_FOR_STANDARD_DEVIATION_TYPES
             if stddev_type == const.StdDev.TOTAL:
                 stddevs.append(
-                    np.sqrt(C['Sigma2'] * C['Sigma2'] + phi_ss * phi_ss) + np.zeros(num_sites))
+                    np.sqrt(
+                        C['Sigma2'] *
+                        C['Sigma2'] +
+                        phi_ss *
+                        phi_ss) +
+                    np.zeros(num_sites))
             elif stddev_type == const.StdDev.INTRA_EVENT:
                 stddevs.append(C['Sigma1'] + np.zeros(num_sites))
             elif stddev_type == const.StdDev.INTER_EVENT:
                 stddevs.append(C['Sigma2'] + np.zeros(num_sites))
         return stddevs
 
-    COEFFS_PHI_SS = CoeffsTable( sa_damping=5, table="""\
+    COEFFS_PHI_SS = CoeffsTable(sa_damping=5, table="""\
     IMT       phi_ss
     pga       0.46
     0.01      0.46
@@ -1056,7 +1081,7 @@ class AkkarBommer2010SWISS04T(AkkarBommer2010SWISS04):
     2.95      0.41061194
     3         0.41
     4         0.41
-    """ )
+    """)
 
 
 class AkkarBommer2010SWISS08T(AkkarBommer2010SWISS08):
@@ -1092,11 +1117,13 @@ class AkkarBommer2010SWISS08T(AkkarBommer2010SWISS08):
         """
         C_ADJ = self.COEFFS_PHI_SS[imt]
 
-        mean, stddevs = super(AkkarBommer2010SWISS08T, self).get_mean_and_stddevs(
+        mean, stddevs = super(
+            AkkarBommer2010SWISS08T, self).get_mean_and_stddevs(
             sites, rup, dists, imt, stddev_types)
 
         std_corr = self._get_corr_stddevs(
-            self.COEFFS[imt], stddev_types, len(sites.vs30), (C_ADJ['phi_ss'] / np.log(10)))
+            self.COEFFS[imt], stddev_types, len(
+                sites.vs30), (C_ADJ['phi_ss'] / np.log(10)))
         stddevs = np.log(10 ** np.array(std_corr))
         return mean, stddevs
 
@@ -1111,14 +1138,19 @@ class AkkarBommer2010SWISS08T(AkkarBommer2010SWISS08):
             assert stddev_type in self.DEFINED_FOR_STANDARD_DEVIATION_TYPES
             if stddev_type == const.StdDev.TOTAL:
                 stddevs.append(
-                    np.sqrt(C['Sigma2'] * C['Sigma2'] + phi_ss * phi_ss) + np.zeros(num_sites))
+                    np.sqrt(
+                        C['Sigma2'] *
+                        C['Sigma2'] +
+                        phi_ss *
+                        phi_ss) +
+                    np.zeros(num_sites))
             elif stddev_type == const.StdDev.INTRA_EVENT:
                 stddevs.append(C['Sigma1'] + np.zeros(num_sites))
             elif stddev_type == const.StdDev.INTER_EVENT:
                 stddevs.append(C['Sigma2'] + np.zeros(num_sites))
         return stddevs
 
-    COEFFS_PHI_SS = CoeffsTable( sa_damping=5, table="""\
+    COEFFS_PHI_SS = CoeffsTable(sa_damping=5, table="""\
     IMT       phi_ss
     pga       0.46
     0.01      0.46
@@ -1186,4 +1218,4 @@ class AkkarBommer2010SWISS08T(AkkarBommer2010SWISS08):
     2.95      0.41061194
     3         0.41
     4         0.41
-    """ )
+    """)
