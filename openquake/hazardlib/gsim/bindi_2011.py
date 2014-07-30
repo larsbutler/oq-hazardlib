@@ -23,7 +23,7 @@ import numpy as np
 
 from scipy.constants import g
 
-from openquake.hazardlib.gsim.base import CoeffsTable, GMPE
+from openquake.hazardlib.gsim.base import CoeffsTable, GMPE, IPE
 from openquake.hazardlib import const
 from openquake.hazardlib.imt import MMI
 
