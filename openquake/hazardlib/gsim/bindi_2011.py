@@ -74,13 +74,17 @@ for a fixed depth of 15 km and epicentral distance (equation 5 in the paper)
 
         stddevs = self._get_stddevs(C, stddev_types)
 
-        return mean, stddevs  
+        return mean, stddevs
 
     def _compute_mean(self, C, mag, rrup, hypo_depth):
         """
         Compute mean value for MSK-64.
         """
-    mean = C['a1']*mag +C['a2']-C['a3'] * np.log10 (np.sqrt((rrup**2 + hypo_depth**2) / hypo_depth**2))-C['a4'] * np.sqrt(rrup**2 + hypo_depth**2)-hypo_depth)
+        mean = (
+            C['a1'] * mag + C['a2'] - C['a3'] * np.log10(
+                np.sqrt((rrup**2 + hypo_depth**2) / hypo_depth**2)
+            ) - C['a4'] * np.sqrt(rrup**2 + hypo_depth**2) -hypo_depth
+        )
 
         return mean
 
@@ -91,7 +95,7 @@ for a fixed depth of 15 km and epicentral distance (equation 5 in the paper)
         stddevs = []
         for stddev_type in stddev_types:
             assert stddev_type in self.DEFINED_FOR_STANDARD_DEVIATION_TYPES
-            stddevs.append( C['sigma']) + np.zeros(num_sites))
+            stddevs.append(C['sigma'] + np.zeros(num_sites))
 
         return stddevs
 
