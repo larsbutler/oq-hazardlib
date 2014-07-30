@@ -588,13 +588,14 @@ class EdwardsFah2013Foreland60MPaMR(EdwardsFah2013Foreland60MPa):
         """
         C1_rrup =0.0
         
-        if dists.rrup < C['Rc11']:
+        if (dists.rrup < C['Rc11']).any():
             C1_rrup = C['phi_11']
             #~ print 'case01 rrup< ', C1_rrup
-        elif dists.rrup >= C['Rc11'] and dists.rrup <= C['Rc21']:
+        elif ((dists.rrup >= C['Rc11']).any()
+                and (dists.rrup <= C['Rc21']).any()):
             C1_rrup = C['phi_11'] + (C['phi_21'] - C['phi_11']) * ((dists.rrup - C['Rc11']) / (C['Rc21'] - C['Rc11']))
             #~ print 'case02 rrup> < ', C1_rrup
-        elif dists.rrup > C['Rc21']:
+        elif (dists.rrup > C['Rc21']).any():
             C1_rrup = C['phi_21']
             #~ print 'case03 rrup> ', C1_rrup
         return C1_rrup
@@ -660,13 +661,14 @@ class EdwardsFah2013Foreland10MPaMR(EdwardsFah2013Foreland10MPa):
         """
         C1_rrup =0.0
         
-        if dists.rrup < C['Rc11']:
+        if (dists.rrup < C['Rc11']).any():
             C1_rrup = C['phi_11']
             #~ print 'case01 rrup< ', C1_rrup
-        elif dists.rrup >= C['Rc11'] and dists.rrup <= C['Rc21']:
+        elif ((dists.rrup >= C['Rc11']).any()
+                and (dists.rrup <= C['Rc21']).any()):
             C1_rrup = C['phi_11'] + (C['phi_21'] - C['phi_11']) * ((dists.rrup - C['Rc11']) / (C['Rc21'] - C['Rc11']))
             #~ print 'case02 rrup> < ', C1_rrup
-        elif dists.rrup > C['Rc21']:
+        elif (dists.rrup > C['Rc21']).any():
             C1_rrup = C['phi_21']
             #~ print 'case03 rrup> ', C1_rrup
         return C1_rrup
@@ -734,10 +736,11 @@ class EdwardsFah2013Foreland20MPaMR(EdwardsFah2013Foreland20MPa):
         """
         C1_rrup =0.0
         
-        if dists.rrup < C['Rc11']:
+        if (dists.rrup < C['Rc11']).any():
             C1_rrup = C['phi_11']
             #~ print 'case01 rrup< ', C1_rrup
-        elif dists.rrup >= C['Rc11'] and dists.rrup <= C['Rc21']:
+        elif ((dists.rrup >= C['Rc11']).any()
+                and (dists.rrup <= C['Rc21']).any()):
             C1_rrup = C['phi_11'] + (C['phi_21'] - C['phi_11']) * ((dists.rrup - C['Rc11']) / (C['Rc21'] - C['Rc11']))
             #~ print 'case02 rrup> < ', C1_rrup
         elif dists.rrup > C['Rc21']:
@@ -807,13 +810,14 @@ class EdwardsFah2013Foreland30MPaMR(EdwardsFah2013Foreland30MPa):
         """
         C1_rrup =0.0
         
-        if dists.rrup < C['Rc11']:
+        if (dists.rrup < C['Rc11']).any():
             C1_rrup = C['phi_11']
             #~ print 'case01 rrup< ', C1_rrup
-        elif dists.rrup >= C['Rc11'] and dists.rrup <= C['Rc21']:
+        elif ((dists.rrup >= C['Rc11']).any()
+                and (dists.rrup <= C['Rc21']).any()):
             C1_rrup = C['phi_11'] + (C['phi_21'] - C['phi_11']) * ((dists.rrup - C['Rc11']) / (C['Rc21'] - C['Rc11']))
             #~ print 'case02 rrup> < ', C1_rrup
-        elif dists.rrup > C['Rc21']:
+        elif (dists.rrup > C['Rc21']).any():
             C1_rrup = C['phi_21']
             #~ print 'case03 rrup> ', C1_rrup
         return C1_rrup
@@ -880,13 +884,14 @@ class EdwardsFah2013Foreland50MPaMR(EdwardsFah2013Foreland50MPa):
         """
         C1_rrup =0.0
         
-        if dists.rrup < C['Rc11']:
+        if (dists.rrup < C['Rc11']).any():
             C1_rrup = C['phi_11']
             #~ print 'case01 rrup< ', C1_rrup
-        elif dists.rrup >= C['Rc11'] and dists.rrup <= C['Rc21']:
+        elif ((dists.rrup >= C['Rc11']).any()
+                and (dists.rrup <= C['Rc21']).any()):
             C1_rrup = C['phi_11'] + (C['phi_21'] - C['phi_11']) * ((dists.rrup - C['Rc11']) / (C['Rc21'] - C['Rc11']))
             #~ print 'case02 rrup> < ', C1_rrup
-        elif dists.rrup > C['Rc21']:
+        elif (dists.rrup > C['Rc21']).any():
             C1_rrup = C['phi_21']
             #~ print 'case03 rrup> ', C1_rrup
         return C1_rrup
@@ -953,13 +958,14 @@ class EdwardsFah2013Foreland75MPaMR(EdwardsFah2013Foreland75MPa):
         """
         C1_rrup =0.0
         
-        if dists.rrup < C['Rc11']:
+        if (dists.rrup < C['Rc11']).any():
             C1_rrup = C['phi_11']
             #~ print 'case01 rrup< ', C1_rrup
-        elif dists.rrup >= C['Rc11'] and dists.rrup <= C['Rc21']:
+        elif ((dists.rrup >= C['Rc11']).any()
+                and (dists.rrup <= C['Rc21']).any()):
             C1_rrup = C['phi_11'] + (C['phi_21'] - C['phi_11']) * ((dists.rrup - C['Rc11']) / (C['Rc21'] - C['Rc11']))
             #~ print 'case02 rrup> < ', C1_rrup
-        elif dists.rrup > C['Rc21']:
+        elif (dists.rrup > C['Rc21']).any():
             C1_rrup = C['phi_21']
             #~ print 'case03 rrup> ', C1_rrup
         return C1_rrup
@@ -1026,13 +1032,14 @@ class EdwardsFah2013Foreland90MPaMR(EdwardsFah2013Foreland90MPa):
         """
         C1_rrup =0.0
         
-        if dists.rrup < C['Rc11']:
+        if (dists.rrup < C['Rc11']).any():
             C1_rrup = C['phi_11']
             #~ print 'case01 rrup< ', C1_rrup
-        elif dists.rrup >= C['Rc11'] and dists.rrup <= C['Rc21']:
+        elif ((dists.rrup >= C['Rc11']).any()
+                and (dists.rrup <= C['Rc21']).any()):
             C1_rrup = C['phi_11'] + (C['phi_21'] - C['phi_11']) * ((dists.rrup - C['Rc11']) / (C['Rc21'] - C['Rc11']))
             #~ print 'case02 rrup> < ', C1_rrup
-        elif dists.rrup > C['Rc21']:
+        elif (dists.rrup > C['Rc21']).any():
             C1_rrup = C['phi_21']
             #~ print 'case03 rrup> ', C1_rrup
         return C1_rrup
@@ -1099,13 +1106,14 @@ class EdwardsFah2013Foreland120MPaMR(EdwardsFah2013Foreland120MPa):
         """
         C1_rrup =0.0
         
-        if dists.rrup < C['Rc11']:
+        if (dists.rrup < C['Rc11']).any():
             C1_rrup = C['phi_11']
             #~ print 'case01 rrup< ', C1_rrup
-        elif dists.rrup >= C['Rc11'] and dists.rrup <= C['Rc21']:
+        elif ((dists.rrup >= C['Rc11']).any()
+                and (dists.rrup <= C['Rc21']).any()):
             C1_rrup = C['phi_11'] + (C['phi_21'] - C['phi_11']) * ((dists.rrup - C['Rc11']) / (C['Rc21'] - C['Rc11']))
             #~ print 'case02 rrup> < ', C1_rrup
-        elif dists.rrup > C['Rc21']:
+        elif (dists.rrup > C['Rc21']).any():
             C1_rrup = C['phi_21']
             #~ print 'case03 rrup> ', C1_rrup
         return C1_rrup
