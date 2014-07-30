@@ -177,16 +177,6 @@ class CauzziFaccioli2008(GMPE):
 
         return mean
 
-    # def _get_stddevs(self, C, stddev_types, num_sites):
-        #"""
-        # Return total standard deviation.
-        #"""
-        #stddevs = []
-        # for stddev_type in stddev_types:
-        #assert stddev_type in self.DEFINED_FOR_STANDARD_DEVIATION_TYPES
-        #stddevs.append(np.log(10 ** C['sigma']) + np.zeros(num_sites))
-
-        # return stddevs
     def _get_stddevs(self, C, stddev_types, num_sites):
         """
         Return standard deviations
@@ -655,7 +645,6 @@ class CauzziFaccioli2008SWISS01(CauzziFaccioli2008):
         std_corr = self._get_corr_stddevs(
             self.COEFFS[imt], stddev_types, len(sites.vs30), phi_ss)
         stddevs = np.log(10 ** np.array(std_corr))
-        #~ print phi_ss
 
         stddevs = np.array(stddevs)
         return mean, stddevs
@@ -666,7 +655,6 @@ class CauzziFaccioli2008SWISS01(CauzziFaccioli2008):
         """
         if mag >= 3.00 and mag < 5.5:
             return 1 / np.exp(((5.50 - mag) / C['a1']) ** C['a2'] * (C['b1'] + C['b2'] * np.log(np.maximum(np.minimum(rhypo, C['Rm']), 10) / 20)))
-            #~ print mag
         elif mag >= 5.50:
             return 1
         else:
@@ -682,15 +670,12 @@ class CauzziFaccioli2008SWISS01(CauzziFaccioli2008):
 
         if (dists.rhypo < C['Rc11']).any():
             C1_rrup = C['phi_11']
-            #~ print 'case01 rhypo< ', C1_rrup
         elif ((dists.rhypo >= C['Rc11']).any()
                 and (dists.rhypo <= C['Rc21']).any()):
             C1_rrup = C['phi_11'] + (C['phi_21'] - C['phi_11']) * \
                 ((dists.rhypo - C['Rc11']) / (C['Rc21'] - C['Rc11']))
-            #~ print 'case02 rhypo> < ', C1_rrup
         elif (dists.rhypo > C['Rc21']).any():
             C1_rrup = C['phi_21']
-            print 'case03 rhypo> ', C1_rrup
         return C1_rrup
 
     def _compute_phi_ss(self, C, rup, C1_rrup, imt):
@@ -978,7 +963,6 @@ class CauzziFaccioli2008SWISS04(CauzziFaccioli2008):
         std_corr = self._get_corr_stddevs(
             self.COEFFS[imt], stddev_types, len(sites.vs30), phi_ss)
         stddevs = np.log(10 ** np.array(std_corr))
-        print stddevs
 
         stddevs = np.array(stddevs)
         return mean, stddevs
@@ -989,7 +973,6 @@ class CauzziFaccioli2008SWISS04(CauzziFaccioli2008):
         """
         if mag >= 3.00 and mag < 5.5:
             return 1 / np.exp(((5.50 - mag) / C['a1']) ** C['a2'] * (C['b1'] + C['b2'] * np.log(np.maximum(np.minimum(rhypo, C['Rm']), 10) / 20)))
-            print mag
         elif mag >= 5.50:
             return 1
         else:
@@ -1005,15 +988,12 @@ class CauzziFaccioli2008SWISS04(CauzziFaccioli2008):
 
         if (dists.rhypo < C['Rc11']).any():
             C1_rrup = C['phi_11']
-            #~ print 'case01 rhypo< ', C1_rrup
         elif ((dists.rhypo >= C['Rc11']).any()
                 and (dists.rhypo <= C['Rc21']).any()):
             C1_rrup = C['phi_11'] + (C['phi_21'] - C['phi_11']) * \
                 ((dists.rhypo - C['Rc11']) / (C['Rc21'] - C['Rc11']))
-            #~ print 'case02 rhypo> < ', C1_rrup
         elif (dists.rhypo > C['Rc21']).any():
             C1_rrup = C['phi_21']
-            print 'case03 rhypo> ', C1_rrup
         return C1_rrup
 
     def _compute_phi_ss(self, C, rup, C1_rrup, imt):
@@ -1301,7 +1281,6 @@ class CauzziFaccioli2008SWISS08(CauzziFaccioli2008):
         std_corr = self._get_corr_stddevs(
             self.COEFFS[imt], stddev_types, len(sites.vs30), phi_ss)
         stddevs = np.log(10 ** np.array(std_corr))
-        # print stddevs
 
         stddevs = np.array(stddevs)
         return mean, stddevs
@@ -1312,7 +1291,6 @@ class CauzziFaccioli2008SWISS08(CauzziFaccioli2008):
         """
         if mag >= 3.00 and mag < 5.5:
             return 1 / np.exp(((5.50 - mag) / C['a1']) ** C['a2'] * (C['b1'] + C['b2'] * np.log(np.maximum(np.minimum(rhypo, C['Rm']), 10) / 20)))
-            print mag
         elif mag >= 5.50:
             return 1
         else:
@@ -1328,15 +1306,12 @@ class CauzziFaccioli2008SWISS08(CauzziFaccioli2008):
 
         if (dists.rhypo < C['Rc11']).any():
             C1_rrup = C['phi_11']
-            #~ print 'case01 rhypo< ', C1_rrup
         elif ((dists.rhypo >= C['Rc11']).any()
                 and (dists.rhypo <= C['Rc21']).any()):
             C1_rrup = C['phi_11'] + (C['phi_21'] - C['phi_11']) * \
                 ((dists.rhypo - C['Rc11']) / (C['Rc21'] - C['Rc11']))
-            #~ print 'case02 rhypo> < ', C1_rrup
         elif (dists.rhypo > C['Rc21']).any():
             C1_rrup = C['phi_21']
-            print 'case03 rhypo> ', C1_rrup
         return C1_rrup
 
     def _compute_phi_ss(self, C, rup, C1_rrup, imt):
@@ -1376,7 +1351,7 @@ class CauzziFaccioli2008SWISS08(CauzziFaccioli2008):
                 stddevs.append(np.log(C['s_between_ev']) + np.zeros(num_sites))
         return stddevs
 
-    COEFFS_FS_ROCK =  CoeffsTable(sa_damping=5, table="""\
+    COEFFS_FS_ROCK = CoeffsTable(sa_damping=5, table="""\
     IMT   k_adj       a1      a2  b1  b2  Rm  phi_11      phi_21      C2          Mc1 Mc2 Rc11 Rc21
     pga   0.634915    9.890787E-01     1.094114E+00 1.000921E+00 6.455198E-01 4.242559E+00 0.58        0.47        0.35        5   7   16   36
     0.05  0.620699347 7.422166E-01     8.879871E-01 1.000934E+00 6.131160E-01 3.908670E+00 0.5520412   0.4490309   0.4059176   5   7   16   36
@@ -1639,7 +1614,7 @@ class CauzziFaccioli2008SWISS01T(CauzziFaccioli2008SWISS01):
                 stddevs.append(np.log(C['s_between_ev']) + np.zeros(num_sites))
         return stddevs
 
-    COEFFS_PHI_SS =      CoeffsTable( sa_damping=5, table="""\
+    COEFFS_PHI_SS = CoeffsTable(sa_damping=5, table="""\
     IMT              phi_ss
     pga              0.460
     0.050            0.453
@@ -1902,7 +1877,7 @@ class CauzziFaccioli2008SWISS04T(CauzziFaccioli2008SWISS04):
                 stddevs.append(np.log(C['s_between_ev']) + np.zeros(num_sites))
         return stddevs
 
-    COEFFS_PHI_SS =      CoeffsTable( sa_damping=5, table="""\
+    COEFFS_PHI_SS = CoeffsTable(sa_damping=5, table="""\
     IMT              phi_ss
     pga              0.460
     0.050            0.453
@@ -2165,7 +2140,7 @@ class CauzziFaccioli2008SWISS08T(CauzziFaccioli2008SWISS08):
                 stddevs.append(np.log(C['s_between_ev']) + np.zeros(num_sites))
         return stddevs
 
-    COEFFS_PHI_SS =      CoeffsTable( sa_damping=5, table="""\
+    COEFFS_PHI_SS = CoeffsTable(sa_damping=5, table="""\
     IMT              phi_ss
     pga              0.460
     0.050            0.453
