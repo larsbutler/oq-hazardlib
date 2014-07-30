@@ -509,7 +509,11 @@ class ZhaoEtAl2006AscSWISS05(ZhaoEtAl2006Asc):
             assert stddev_type in self.DEFINED_FOR_STANDARD_DEVIATION_TYPES
             if stddev_type == const.StdDev.TOTAL:
                 stddevs.append(
-                    np.sqrt(C['tauC'] ** 2 + phi_ss * phi_ss) + np.zeros(num_sites))
+                    np.sqrt(
+                        C['tauC'] ** 2 +
+                        phi_ss *
+                        phi_ss) +
+                    np.zeros(num_sites))
             elif stddev_type == const.StdDev.INTRA_EVENT:
                 stddevs.append(C['sigma'] + np.zeros(num_sites))
             elif stddev_type == const.StdDev.INTER_EVENT:
@@ -518,7 +522,8 @@ class ZhaoEtAl2006AscSWISS05(ZhaoEtAl2006Asc):
 
     def _compute_small_mag_correction_term(self, C, mag, rrup):
         if mag >= 3.00 and mag < 5.5:
-            return 1 / np.exp(((5.50 - mag) / C['a1']) ** C['a2'] * (C['b1'] + C['b2'] * np.log(np.maximum(np.minimum(rrup, C['Rm']), 10) / 20)))
+            return 1 / np.exp(((5.50 - mag) / C['a1']) ** C['a2'] * (
+                C['b1'] + C['b2'] * np.log(np.maximum(np.minimum(rrup, C['Rm']), 10) / 20)))
         elif mag >= 5.50:
             return 1
         else:
@@ -635,7 +640,10 @@ class ZhaoEtAl2006AscSWISS03(ZhaoEtAl2006Asc):
             assert stddev_type in self.DEFINED_FOR_STANDARD_DEVIATION_TYPES
             if stddev_type == const.StdDev.TOTAL:
                 stddevs.append(
-                    np.sqrt(C['tauC'] ** 2 + phi_ss ** 2) + np.zeros(num_sites))
+                    np.sqrt(
+                        C['tauC'] ** 2 +
+                        phi_ss ** 2) +
+                    np.zeros(num_sites))
             elif stddev_type == const.StdDev.INTRA_EVENT:
                 stddevs.append(C['sigma'] + np.zeros(num_sites))
             elif stddev_type == const.StdDev.INTER_EVENT:
@@ -644,7 +652,8 @@ class ZhaoEtAl2006AscSWISS03(ZhaoEtAl2006Asc):
 
     def _compute_small_mag_correction_term(self, C, mag, rrup):
         if mag >= 3.00 and mag < 5.5:
-            return 1 / np.exp(((5.50 - mag) / C['a1']) ** C['a2'] * (C['b1'] + C['b2'] * np.log(np.maximum(np.minimum(rrup, C['Rm']), 10) / 20)))
+            return 1 / np.exp(((5.50 - mag) / C['a1']) ** C['a2'] * (
+                C['b1'] + C['b2'] * np.log(np.maximum(np.minimum(rrup, C['Rm']), 10) / 20)))
         elif mag >= 5.50:
             return 1
         else:
@@ -762,7 +771,10 @@ class ZhaoEtAl2006AscSWISS08(ZhaoEtAl2006Asc):
             assert stddev_type in self.DEFINED_FOR_STANDARD_DEVIATION_TYPES
             if stddev_type == const.StdDev.TOTAL:
                 stddevs.append(
-                    np.sqrt(C['tauC'] ** 2 + phi_ss ** 2) + np.zeros(num_sites))
+                    np.sqrt(
+                        C['tauC'] ** 2 +
+                        phi_ss ** 2) +
+                    np.zeros(num_sites))
             elif stddev_type == const.StdDev.INTRA_EVENT:
                 stddevs.append(C['sigma'] + np.zeros(num_sites))
             elif stddev_type == const.StdDev.INTER_EVENT:
@@ -771,7 +783,8 @@ class ZhaoEtAl2006AscSWISS08(ZhaoEtAl2006Asc):
 
     def _compute_small_mag_correction_term(self, C, mag, rrup):
         if mag >= 3.00 and mag < 5.5:
-            return 1 / np.exp(((5.50 - mag) / C['a1']) ** C['a2'] * (C['b1'] + C['b2'] * np.log(np.maximum(np.minimum(rrup, C['Rm']), 10) / 20)))
+            return 1 / np.exp(((5.50 - mag) / C['a1']) ** C['a2'] * (
+                C['b1'] + C['b2'] * np.log(np.maximum(np.minimum(rrup, C['Rm']), 10) / 20)))
         elif mag >= 5.50:
             return 1
         else:
@@ -869,11 +882,13 @@ class ZhaoEtAl2006AscSWISS05T(ZhaoEtAl2006AscSWISS05):
         """
         C_ADJ = self.COEFFS_PHI_SS[imt]
 
-        mean, stddevs = super(ZhaoEtAl2006AscSWISS05T, self).get_mean_and_stddevs(
+        mean, stddevs = super(
+            ZhaoEtAl2006AscSWISS05T, self).get_mean_and_stddevs(
             sites, rup, dists, imt, stddev_types)
 
         std_corr = self._get_corr_stddevs(
-            self.COEFFS_ASC[imt], stddev_types, len(sites.vs30), C_ADJ['phi_ss'])
+            self.COEFFS_ASC[imt], stddev_types, len(
+                sites.vs30), C_ADJ['phi_ss'])
         stddevs = np.array(std_corr)
 
         return mean, stddevs
@@ -888,37 +903,40 @@ class ZhaoEtAl2006AscSWISS05T(ZhaoEtAl2006AscSWISS05):
             assert stddev_type in self.DEFINED_FOR_STANDARD_DEVIATION_TYPES
             if stddev_type == const.StdDev.TOTAL:
                 stddevs.append(
-                    np.sqrt(C['tauC'] ** 2 + phi_ss ** 2) + np.zeros(num_sites))
+                    np.sqrt(
+                        C['tauC'] ** 2 +
+                        phi_ss ** 2) +
+                    np.zeros(num_sites))
             elif stddev_type == const.StdDev.INTRA_EVENT:
                 stddevs.append(C['sigma'] + np.zeros(num_sites))
             elif stddev_type == const.StdDev.INTER_EVENT:
                 stddevs.append(C['tauC'] + np.zeros(num_sites))
             return stddevs
 
-    COEFFS_PHI_SS = CoeffsTable( sa_damping=5, table="""\
+    COEFFS_PHI_SS = CoeffsTable(sa_damping=5, table="""\
     IMT     phi_ss
-	pga 	0.460
-	0.050	0.453
-	0.100	0.450
-	0.150	0.468
-	0.200	0.480
-	0.250	0.480
-	0.300	0.480
-	0.400	0.469
-	0.500	0.460
-	0.600	0.457
-	0.700	0.455
-	0.800	0.453
-	0.900	0.452
-	1.000	0.450
-	1.250	0.442
-	1.500	0.435
-	2.000	0.425
-	2.500	0.417
-	3.000	0.410
-	4.000	0.410
-	5.000	0.410
-    """ )
+    pga     0.460
+    0.050    0.453
+    0.100    0.450
+    0.150    0.468
+    0.200    0.480
+    0.250    0.480
+    0.300    0.480
+    0.400    0.469
+    0.500    0.460
+    0.600    0.457
+    0.700    0.455
+    0.800    0.453
+    0.900    0.452
+    1.000    0.450
+    1.250    0.442
+    1.500    0.435
+    2.000    0.425
+    2.500    0.417
+    3.000    0.410
+    4.000    0.410
+    5.000    0.410
+    """)
 
 
 class ZhaoEtAl2006AscSWISS03T(ZhaoEtAl2006AscSWISS03):
@@ -954,11 +972,13 @@ class ZhaoEtAl2006AscSWISS03T(ZhaoEtAl2006AscSWISS03):
         """
         C_ADJ = self.COEFFS_PHI_SS[imt]
 
-        mean, stddevs = super(ZhaoEtAl2006AscSWISS03T, self).get_mean_and_stddevs(
+        mean, stddevs = super(
+            ZhaoEtAl2006AscSWISS03T, self).get_mean_and_stddevs(
             sites, rup, dists, imt, stddev_types)
 
         std_corr = self._get_corr_stddevs(
-            self.COEFFS_ASC[imt], stddev_types, len(sites.vs30), C_ADJ['phi_ss'])
+            self.COEFFS_ASC[imt], stddev_types, len(
+                sites.vs30), C_ADJ['phi_ss'])
         stddevs = np.array(std_corr)
         return mean, stddevs
 
@@ -972,37 +992,40 @@ class ZhaoEtAl2006AscSWISS03T(ZhaoEtAl2006AscSWISS03):
             assert stddev_type in self.DEFINED_FOR_STANDARD_DEVIATION_TYPES
             if stddev_type == const.StdDev.TOTAL:
                 stddevs.append(
-                    np.sqrt(C['tauC'] ** 2 + phi_ss ** 2) + np.zeros(num_sites))
+                    np.sqrt(
+                        C['tauC'] ** 2 +
+                        phi_ss ** 2) +
+                    np.zeros(num_sites))
             elif stddev_type == const.StdDev.INTRA_EVENT:
                 stddevs.append(C['sigma'] + np.zeros(num_sites))
             elif stddev_type == const.StdDev.INTER_EVENT:
                 stddevs.append(C['tauC'] + np.zeros(num_sites))
             return stddevs
 
-    COEFFS_PHI_SS = CoeffsTable( sa_damping=5, table="""\
+    COEFFS_PHI_SS = CoeffsTable(sa_damping=5, table="""\
     IMT     phi_ss
-	pga 	0.460
-	0.050	0.453
-	0.100	0.450
-	0.150	0.468
-	0.200	0.480
-	0.250	0.480
-	0.300	0.480
-	0.400	0.469
-	0.500	0.460
-	0.600	0.457
-	0.700	0.455
-	0.800	0.453
-	0.900	0.452
-	1.000	0.450
-	1.250	0.442
-	1.500	0.435
-	2.000	0.425
-	2.500	0.417
-	3.000	0.410
-	4.000	0.410
-	5.000	0.410
-    """ )
+    pga     0.460
+    0.050    0.453
+    0.100    0.450
+    0.150    0.468
+    0.200    0.480
+    0.250    0.480
+    0.300    0.480
+    0.400    0.469
+    0.500    0.460
+    0.600    0.457
+    0.700    0.455
+    0.800    0.453
+    0.900    0.452
+    1.000    0.450
+    1.250    0.442
+    1.500    0.435
+    2.000    0.425
+    2.500    0.417
+    3.000    0.410
+    4.000    0.410
+    5.000    0.410
+    """)
 
 
 class ZhaoEtAl2006AscSWISS08T(ZhaoEtAl2006AscSWISS08):
@@ -1038,11 +1061,13 @@ class ZhaoEtAl2006AscSWISS08T(ZhaoEtAl2006AscSWISS08):
         """
         C_ADJ = self.COEFFS_PHI_SS[imt]
 
-        mean, stddevs = super(ZhaoEtAl2006AscSWISS08T, self).get_mean_and_stddevs(
+        mean, stddevs = super(
+            ZhaoEtAl2006AscSWISS08T, self).get_mean_and_stddevs(
             sites, rup, dists, imt, stddev_types)
 
         std_corr = self._get_corr_stddevs(
-            self.COEFFS_ASC[imt], stddev_types, len(sites.vs30), C_ADJ['phi_ss'])
+            self.COEFFS_ASC[imt], stddev_types, len(
+                sites.vs30), C_ADJ['phi_ss'])
         stddevs = np.array(std_corr)
         return mean, stddevs
 
@@ -1056,34 +1081,37 @@ class ZhaoEtAl2006AscSWISS08T(ZhaoEtAl2006AscSWISS08):
             assert stddev_type in self.DEFINED_FOR_STANDARD_DEVIATION_TYPES
             if stddev_type == const.StdDev.TOTAL:
                 stddevs.append(
-                    np.sqrt(C['tauC'] ** 2 + phi_ss ** 2) + np.zeros(num_sites))
+                    np.sqrt(
+                        C['tauC'] ** 2 +
+                        phi_ss ** 2) +
+                    np.zeros(num_sites))
             elif stddev_type == const.StdDev.INTRA_EVENT:
                 stddevs.append(C['sigma'] + np.zeros(num_sites))
             elif stddev_type == const.StdDev.INTER_EVENT:
                 stddevs.append(C['tauC'] + np.zeros(num_sites))
             return stddevs
 
-    COEFFS_PHI_SS = CoeffsTable( sa_damping=5, table="""\
+    COEFFS_PHI_SS = CoeffsTable(sa_damping=5, table="""\
     IMT     phi_ss
-	pga 	0.460
-	0.050	0.453
-	0.100	0.450
-	0.150	0.468
-	0.200	0.480
-	0.250	0.480
-	0.300	0.480
-	0.400	0.469
-	0.500	0.460
-	0.600	0.457
-	0.700	0.455
-	0.800	0.453
-	0.900	0.452
-	1.000	0.450
-	1.250	0.442
-	1.500	0.435
-	2.000	0.425
-	2.500	0.417
-	3.000	0.410
-	4.000	0.410
-	5.000	0.410
-    """ )
+    pga     0.460
+    0.050    0.453
+    0.100    0.450
+    0.150    0.468
+    0.200    0.480
+    0.250    0.480
+    0.300    0.480
+    0.400    0.469
+    0.500    0.460
+    0.600    0.457
+    0.700    0.455
+    0.800    0.453
+    0.900    0.452
+    1.000    0.450
+    1.250    0.442
+    1.500    0.435
+    2.000    0.425
+    2.500    0.417
+    3.000    0.410
+    4.000    0.410
+    5.000    0.410
+    """)
