@@ -654,7 +654,8 @@ class CauzziFaccioli2008SWISS01(CauzziFaccioli2008):
         small magnitude correction applied to the median values
         """
         if mag >= 3.00 and mag < 5.5:
-            return 1 / np.exp(((5.50 - mag) / C['a1']) ** C['a2'] * (C['b1'] + C['b2'] * np.log(np.maximum(np.minimum(rhypo, C['Rm']), 10) / 20)))
+            return 1 / np.exp(((5.50 - mag) / C['a1']) ** C['a2'] * (
+                C['b1'] + C['b2'] * np.log(np.maximum(np.minimum(rhypo, C['Rm']), 10) / 20)))
         elif mag >= 5.50:
             return 1
         else:
@@ -708,7 +709,10 @@ class CauzziFaccioli2008SWISS01(CauzziFaccioli2008):
             assert stddev_type in self.DEFINED_FOR_STANDARD_DEVIATION_TYPES
             if stddev_type == const.StdDev.TOTAL:
                 stddevs.append(
-                    np.sqrt(C['s_between_ev'] ** 2 + phi_ss ** 2) + np.zeros(num_sites))
+                    np.sqrt(
+                        C['s_between_ev'] ** 2 +
+                        phi_ss ** 2) +
+                    np.zeros(num_sites))
             elif stddev_type == const.StdDev.INTRA_EVENT:
                 stddevs.append(np.log(C['s_within_ev']) + np.zeros(num_sites))
             elif stddev_type == const.StdDev.INTER_EVENT:
@@ -972,7 +976,8 @@ class CauzziFaccioli2008SWISS04(CauzziFaccioli2008):
         small magnitude correction applied to the median values
         """
         if mag >= 3.00 and mag < 5.5:
-            return 1 / np.exp(((5.50 - mag) / C['a1']) ** C['a2'] * (C['b1'] + C['b2'] * np.log(np.maximum(np.minimum(rhypo, C['Rm']), 10) / 20)))
+            return 1 / np.exp(((5.50 - mag) / C['a1']) ** C['a2'] * (
+                C['b1'] + C['b2'] * np.log(np.maximum(np.minimum(rhypo, C['Rm']), 10) / 20)))
         elif mag >= 5.50:
             return 1
         else:
@@ -1026,7 +1031,10 @@ class CauzziFaccioli2008SWISS04(CauzziFaccioli2008):
             assert stddev_type in self.DEFINED_FOR_STANDARD_DEVIATION_TYPES
             if stddev_type == const.StdDev.TOTAL:
                 stddevs.append(
-                    np.sqrt(C['s_between_ev'] ** 2 + phi_ss ** 2) + np.zeros(num_sites))
+                    np.sqrt(
+                        C['s_between_ev'] ** 2 +
+                        phi_ss ** 2) +
+                    np.zeros(num_sites))
             elif stddev_type == const.StdDev.INTRA_EVENT:
                 stddevs.append(np.log(C['s_within_ev']) + np.zeros(num_sites))
             elif stddev_type == const.StdDev.INTER_EVENT:
@@ -1290,7 +1298,8 @@ class CauzziFaccioli2008SWISS08(CauzziFaccioli2008):
         small magnitude correction applied to the median values
         """
         if mag >= 3.00 and mag < 5.5:
-            return 1 / np.exp(((5.50 - mag) / C['a1']) ** C['a2'] * (C['b1'] + C['b2'] * np.log(np.maximum(np.minimum(rhypo, C['Rm']), 10) / 20)))
+            return 1 / np.exp(((5.50 - mag) / C['a1']) ** C['a2'] * (
+                C['b1'] + C['b2'] * np.log(np.maximum(np.minimum(rhypo, C['Rm']), 10) / 20)))
         elif mag >= 5.50:
             return 1
         else:
@@ -1344,7 +1353,10 @@ class CauzziFaccioli2008SWISS08(CauzziFaccioli2008):
             assert stddev_type in self.DEFINED_FOR_STANDARD_DEVIATION_TYPES
             if stddev_type == const.StdDev.TOTAL:
                 stddevs.append(
-                    np.sqrt(C['s_between_ev'] ** 2 + phi_ss ** 2) + np.zeros(num_sites))
+                    np.sqrt(
+                        C['s_between_ev'] ** 2 +
+                        phi_ss ** 2) +
+                    np.zeros(num_sites))
             elif stddev_type == const.StdDev.INTRA_EVENT:
                 stddevs.append(np.log(C['s_within_ev']) + np.zeros(num_sites))
             elif stddev_type == const.StdDev.INTER_EVENT:
@@ -1589,11 +1601,13 @@ class CauzziFaccioli2008SWISS01T(CauzziFaccioli2008SWISS01):
         """
         C_ADJ = self.COEFFS_PHI_SS[imt]
 
-        mean, stddevs = super(CauzziFaccioli2008SWISS01T, self).get_mean_and_stddevs(
+        mean, stddevs = super(
+            CauzziFaccioli2008SWISS01T, self).get_mean_and_stddevs(
             sites, rup, dists, imt, stddev_types)
 
         std_corr = self._get_corr_stddevs(
-            self.COEFFS[imt], stddev_types, len(sites.vs30), C_ADJ['phi_ss'] / np.log(10))
+            self.COEFFS[imt], stddev_types, len(
+                sites.vs30), C_ADJ['phi_ss'] / np.log(10))
         stddevs = np.log(10 ** np.array(std_corr))
         return mean, stddevs
 
@@ -1607,7 +1621,10 @@ class CauzziFaccioli2008SWISS01T(CauzziFaccioli2008SWISS01):
             assert stddev_type in self.DEFINED_FOR_STANDARD_DEVIATION_TYPES
             if stddev_type == const.StdDev.TOTAL:
                 stddevs.append(
-                    np.sqrt(C['s_between_ev'] ** 2 + phi_ss ** 2) + np.zeros(num_sites))
+                    np.sqrt(
+                        C['s_between_ev'] ** 2 +
+                        phi_ss ** 2) +
+                    np.zeros(num_sites))
             elif stddev_type == const.StdDev.INTRA_EVENT:
                 stddevs.append(np.log(C['s_within_ev']) + np.zeros(num_sites))
             elif stddev_type == const.StdDev.INTER_EVENT:
@@ -1852,11 +1869,13 @@ class CauzziFaccioli2008SWISS04T(CauzziFaccioli2008SWISS04):
         """
         C_ADJ = self.COEFFS_PHI_SS[imt]
 
-        mean, stddevs = super(CauzziFaccioli2008SWISS04T, self).get_mean_and_stddevs(
+        mean, stddevs = super(
+            CauzziFaccioli2008SWISS04T, self).get_mean_and_stddevs(
             sites, rup, dists, imt, stddev_types)
 
         std_corr = self._get_corr_stddevs(
-            self.COEFFS[imt], stddev_types, len(sites.vs30), C_ADJ['phi_ss'] / np.log(10))
+            self.COEFFS[imt], stddev_types, len(
+                sites.vs30), C_ADJ['phi_ss'] / np.log(10))
         stddevs = np.log(10 ** np.array(std_corr))
         return mean, stddevs
 
@@ -1870,7 +1889,10 @@ class CauzziFaccioli2008SWISS04T(CauzziFaccioli2008SWISS04):
             assert stddev_type in self.DEFINED_FOR_STANDARD_DEVIATION_TYPES
             if stddev_type == const.StdDev.TOTAL:
                 stddevs.append(
-                    np.sqrt(C['s_between_ev'] ** 2 + phi_ss ** 2) + np.zeros(num_sites))
+                    np.sqrt(
+                        C['s_between_ev'] ** 2 +
+                        phi_ss ** 2) +
+                    np.zeros(num_sites))
             elif stddev_type == const.StdDev.INTRA_EVENT:
                 stddevs.append(np.log(C['s_within_ev']) + np.zeros(num_sites))
             elif stddev_type == const.StdDev.INTER_EVENT:
@@ -2115,11 +2137,13 @@ class CauzziFaccioli2008SWISS08T(CauzziFaccioli2008SWISS08):
         """
         C_ADJ = self.COEFFS_PHI_SS[imt]
 
-        mean, stddevs = super(CauzziFaccioli2008SWISS08T, self).get_mean_and_stddevs(
+        mean, stddevs = super(
+            CauzziFaccioli2008SWISS08T, self).get_mean_and_stddevs(
             sites, rup, dists, imt, stddev_types)
 
         std_corr = self._get_corr_stddevs(
-            self.COEFFS[imt], stddev_types, len(sites.vs30), C_ADJ['phi_ss'] / np.log(10))
+            self.COEFFS[imt], stddev_types, len(
+                sites.vs30), C_ADJ['phi_ss'] / np.log(10))
         stddevs = np.log(10 ** np.array(std_corr))
         return mean, stddevs
 
@@ -2133,7 +2157,10 @@ class CauzziFaccioli2008SWISS08T(CauzziFaccioli2008SWISS08):
             assert stddev_type in self.DEFINED_FOR_STANDARD_DEVIATION_TYPES
             if stddev_type == const.StdDev.TOTAL:
                 stddevs.append(
-                    np.sqrt(C['s_between_ev'] ** 2 + phi_ss ** 2) + np.zeros(num_sites))
+                    np.sqrt(
+                        C['s_between_ev'] ** 2 +
+                        phi_ss ** 2) +
+                    np.zeros(num_sites))
             elif stddev_type == const.StdDev.INTRA_EVENT:
                 stddevs.append(np.log(C['s_within_ev']) + np.zeros(num_sites))
             elif stddev_type == const.StdDev.INTER_EVENT:

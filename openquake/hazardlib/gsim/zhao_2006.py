@@ -405,6 +405,7 @@ class ZhaoEtAl2006SSlab(ZhaoEtAl2006Asc):
 
 
 class ZhaoEtAl2006SInterNSHMP2008(ZhaoEtAl2006SInter):
+
     """
     Extend :class:`ZhaoEtAl2006SInter` and fix hypocentral depth at 20 km
     as defined the by National Seismic Hazard Mapping Project for the 2008 US
@@ -418,6 +419,7 @@ class ZhaoEtAl2006SInterNSHMP2008(ZhaoEtAl2006SInter):
     ``hazSUBXnga.f`` Fotran code available at:
     http://earthquake.usgs.gov/hazards/products/conterminous/2008/software/
     """
+
     def get_mean_and_stddevs(self, sites, rup, dists, imt, stddev_types):
         """
         See :meth:`superclass method

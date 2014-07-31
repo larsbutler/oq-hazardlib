@@ -299,13 +299,23 @@ class ChiouYoungs2008SWISS01(ChiouYoungs2008):
         small magnitude correction applied to the median values
         """
         if mag >= 3.00 and mag < 5.5:
-            return 1 / np.exp(((5.50 - mag) / C['a1']) ** C['a2'] * (C['b1'] + C['b2'] * np.log(np.maximum(np.minimum(rrup, C['Rm']), 10) / 20)))
+            return 1 / np.exp(((5.50 - mag) / C['a1']) ** C['a2'] * (
+                C['b1'] + C['b2'] * np.log(np.maximum(np.minimum(rrup, C['Rm']), 10) / 20)))
         elif mag >= 5.50:
             return 1
         else:
             return 1
 
-    def _get_corr_stddevs(self, C, rup, stddev_types, ln_y_ref, exp1, exp2, phi_ss, sites):
+    def _get_corr_stddevs(
+            self,
+            C,
+            rup,
+            stddev_types,
+            ln_y_ref,
+            exp1,
+            exp2,
+            phi_ss,
+            sites):
         """
         Return standard deviations adjusted for single station sigma
         as the total standard deviation - as proposed to be used in
@@ -452,13 +462,23 @@ class ChiouYoungs2008SWISS06(ChiouYoungs2008):
         small magnitude correction applied to the median values
         """
         if mag >= 3.00 and mag < 5.5:
-            return 1 / np.exp(((5.50 - mag) / C['a1']) ** C['a2'] * (C['b1'] + C['b2'] * np.log(np.maximum(np.minimum(rrup, C['Rm']), 10) / 20)))
+            return 1 / np.exp(((5.50 - mag) / C['a1']) ** C['a2'] * (
+                C['b1'] + C['b2'] * np.log(np.maximum(np.minimum(rrup, C['Rm']), 10) / 20)))
         elif mag >= 5.50:
             return 1
         else:
             return 1
 
-    def _get_corr_stddevs(self, C, rup, stddev_types, ln_y_ref, exp1, exp2, phi_ss, sites):
+    def _get_corr_stddevs(
+            self,
+            C,
+            rup,
+            stddev_types,
+            ln_y_ref,
+            exp1,
+            exp2,
+            phi_ss,
+            sites):
         """
         Return standard deviations adjusted for single station sigma
         as the total standard deviation - as proposed to be used in
@@ -604,13 +624,23 @@ class ChiouYoungs2008SWISS04(ChiouYoungs2008):
         small magnitude correction applied to the median values
         """
         if mag >= 3.00 and mag < 5.5:
-            return 1 / np.exp(((5.50 - mag) / C['a1']) ** C['a2'] * (C['b1'] + C['b2'] * np.log(np.maximum(np.minimum(rrup, C['Rm']), 10) / 20)))
+            return 1 / np.exp(((5.50 - mag) / C['a1']) ** C['a2'] * (
+                C['b1'] + C['b2'] * np.log(np.maximum(np.minimum(rrup, C['Rm']), 10) / 20)))
         elif mag >= 5.50:
             return 1
         else:
             return 1
 
-    def _get_corr_stddevs(self, C, rup, stddev_types, ln_y_ref, exp1, exp2, phi_ss, sites):
+    def _get_corr_stddevs(
+            self,
+            C,
+            rup,
+            stddev_types,
+            ln_y_ref,
+            exp1,
+            exp2,
+            phi_ss,
+            sites):
         """
         Return standard deviations adjusted for single station sigma
         as the total standard deviation - as proposed to be used in
