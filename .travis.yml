@@ -1,0 +1,15 @@
+language: python
+python:
+  - "2.7"
+virtualenv:
+  system_site_packages: true
+before_install:
+  - uname -a
+  - dpkg --get-selections | grep gcc
+  - for foo in `dpkg --get-selections | grep gcc | awk '{print $1}'`; do apt-cache show $foo; done
+  - sudo apt-get update -qq
+  - sudo apt-get dist-upgrade --yes
+install:
+  - sudo apt-get install python-numpy python-scipy python-shapely
+  - sudo apt-get install python-nose python-coverage python-mock
+script: "nosetests --with-doctest --with-coverage --cover-package=openquake.hazardlib"
